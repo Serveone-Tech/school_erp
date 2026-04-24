@@ -92,9 +92,14 @@ app.use(
     secret: sessionSecret || "dev-only-secret-not-for-production",
     resave: false,
     saveUninitialized: false,
+    proxy: true, // trust X-Forwarded-Proto from reverse proxy
     name: "bse.sid",
     cookie: {
-      secure: isProduction,
+      // "auto" = send cookie regardless of connection type, but add Secure flag only when
+      // the connection is detected as HTTPS (via X-Forwarded-Proto or direct TLS).
+      // Using `true` causes express-session to silently drop Set-Cookie when running behind
+      // an SSL-terminating proxy that doesn't forward X-Forwarded-Proto.
+      secure: "auto",
       httpOnly: true,
       sameSite: "lax",
       maxAge: 7 * 24 * 60 * 60 * 1000,
