@@ -40,7 +40,7 @@ declare module "express-session" {
   }
 }
 
-// Trust reverse proxy (Replit/Nginx) for correct IP detection
+// Trust reverse proxy (nginx/caddy) for correct IP and protocol detection
 app.set("trust proxy", 1);
 
 // --- PERFORMANCE: Gzip compression ---
@@ -96,13 +96,13 @@ app.use(
     cookie: {
       secure: isProduction,
       httpOnly: true,
-      sameSite: "lax",
+      sameSite: isProduction ? "none" : "lax",
       maxAge: 7 * 24 * 60 * 60 * 1000,
     },
   }),
 );
 
-// ── Backup router — session ke BAAD register karo ────────────────────────────
+// ── Backup router — must be registered after session middleware ───────────────
 app.use("/api/backups", backupRouter);
 
 export function log(message: string, source = "express") {

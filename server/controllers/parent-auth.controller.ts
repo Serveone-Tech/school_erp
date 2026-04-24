@@ -53,7 +53,10 @@ export const ParentAuthController = {
     storage.updateParentPortalUser(matched.id, { lastLoginAt: new Date() }).catch(() => {});
 
     const { passwordHash, ...safe } = matched;
-    res.json({ parent: safe });
+    req.session.save((err) => {
+      if (err) return res.status(500).json({ message: "Session error, try again" });
+      res.json({ parent: safe });
+    });
   },
 
   async logout(req: Request, res: Response) {

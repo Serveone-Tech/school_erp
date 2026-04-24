@@ -29,11 +29,15 @@ export const AuthController = {
     req.session.userName = user.name;
     req.session.userEmail = user.email;
     req.session.userPermissions = user.permissions ?? [];
-    // Sub-users (staff/teacher/accountant) carry their parent admin's ID for data scoping
     if (user.adminId) (req.session as any).adminId = user.adminId;
 
     const { passwordHash, ...safeUser } = user;
-    res.json({ user: safeUser });
+
+    // Explicitly save session before responding — ensures it's persisted to DB
+    req.session.save((err) => {
+      if (err) return res.status(500).json({ message: "Session error, try again" });
+      res.json({ user: safeUser });
+    });
   },
 
   async logout(req: Request, res: Response) {
