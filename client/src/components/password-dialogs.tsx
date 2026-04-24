@@ -242,7 +242,7 @@ export function ForgotPasswordDialog({ open, onOpenChange }: ForgotPasswordProps
                 value={email}
                 onChange={e => setEmail(e.target.value)}
                 required
-                placeholder="admin@badamsingh.com"
+                placeholder=""
               />
             </div>
             <Button type="submit" className="w-full" disabled={loading} data-testid="button-send-otp">

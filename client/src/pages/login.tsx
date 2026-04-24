@@ -17,8 +17,8 @@ import { ForgotPasswordDialog } from "@/components/password-dialogs";
 export default function LoginPage() {
   const { login } = useAuth();
   const { toast } = useToast();
-  const [email, setEmail] = useState("admin@badamsingh.com");
-  const [password, setPassword] = useState("admin123");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [forgotOpen, setForgotOpen] = useState(false);
 
@@ -75,7 +75,7 @@ export default function LoginPage() {
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  placeholder="admin@badamsingh.com"
+                  placeholder=""
                   required
                   className="bg-white/10 border-white/20 text-white placeholder:text-white/30 focus:border-primary"
                 />
@@ -100,7 +100,7 @@ export default function LoginPage() {
                   type="password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  placeholder="••••••••"
+                  placeholder=""
                   required
                   className="bg-white/10 border-white/20 text-white placeholder:text-white/30 focus:border-primary"
                 />
@@ -117,9 +117,6 @@ export default function LoginPage() {
                 Sign In
               </Button>
             </form>
-            <p className="text-xs text-white/30 text-center mt-4">
-              Default: admin@badamsingh.com / admin123
-            </p>
             <p className="text-center text-sm text-white/40 mt-3">
               New here?{" "}
               <a href="/register" className="text-primary/80 hover:text-primary transition-colors">
