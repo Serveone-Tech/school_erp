@@ -78,7 +78,7 @@ function AuthenticatedRouter() {
   );
 
   // Public routes — accessible without login
-  if (location === "/register") return <RegisterPage />;
+  if (location === "/register") return user ? <Redirect to="/" /> : <RegisterPage />;
   if (location.startsWith("/driver-track/")) return <DriverTrackPage />;
 
   // Parent portal login (always public)

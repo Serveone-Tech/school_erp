@@ -36,6 +36,7 @@ export default function RegisterPage() {
       if (!res.ok) throw new Error(data.message || "Registration failed");
       // Auto-login by re-fetching user state (session is already set by register endpoint)
       await login(form.email, form.password);
+      navigate("/");
     } catch (err: any) {
       toast({ title: err.message, variant: "destructive" });
       setLoading(false);
