@@ -12,6 +12,7 @@ import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Plus, Search, Eye, Trash2, MoreHorizontal, GraduationCap, ChevronLeft, ChevronRight } from "lucide-react";
+import { useConfirm } from "@/hooks/use-confirm";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 
 const DESIGNATIONS = ["Teacher","Principal","Vice Principal","Librarian","Accountant","Clerk","Lab Assistant","Peon","Driver","Guard","Sports Teacher","Music Teacher","Art Teacher"];
@@ -82,6 +83,7 @@ export default function StaffPage() {
   const [, navigate] = useLocation();
   const { toast } = useToast();
   const qc = useQueryClient();
+  const { confirm, ConfirmDialog } = useConfirm();
   const [search, setSearch] = useState("");
   const [desigFilter, setDesigFilter] = useState("all");
   const [addOpen, setAddOpen] = useState(false);
@@ -153,7 +155,7 @@ export default function StaffPage() {
                     <DropdownMenuTrigger asChild><Button variant="ghost" size="icon" className="h-7 w-7"><MoreHorizontal className="w-4 h-4" /></Button></DropdownMenuTrigger>
                     <DropdownMenuContent align="end" className="rounded-xl">
                       <DropdownMenuItem onClick={() => navigate(`/staff/${s.id}`)}><Eye className="w-4 h-4 mr-2" />View</DropdownMenuItem>
-                      <DropdownMenuItem onClick={() => { if (confirm("Delete?")) deleteMutation.mutate(s.id); }} className="text-destructive"><Trash2 className="w-4 h-4 mr-2" />Delete</DropdownMenuItem>
+                      <DropdownMenuItem onClick={async () => { if (await confirm({ title: "Delete Staff", description: `Remove ${s.name} from the system? This cannot be undone.`, confirmLabel: "Delete", variant: "destructive" })) deleteMutation.mutate(s.id); }} className="text-destructive"><Trash2 className="w-4 h-4 mr-2" />Delete</DropdownMenuItem>
                     </DropdownMenuContent>
                   </DropdownMenu>
                 </td>
@@ -177,6 +179,7 @@ export default function StaffPage() {
           <AddStaffForm onClose={() => setAddOpen(false)} />
         </DialogContent>
       </Dialog>
+      {ConfirmDialog}
     </div>
   );
 }

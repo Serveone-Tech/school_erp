@@ -12,6 +12,7 @@ import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Plus, Search, Eye, Trash2, MoreHorizontal, Users, ChevronLeft, ChevronRight } from "lucide-react";
+import { useConfirm } from "@/hooks/use-confirm";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { format } from "date-fns";
 
@@ -167,6 +168,7 @@ export default function StudentsPage() {
   const [, navigate] = useLocation();
   const { toast } = useToast();
   const qc = useQueryClient();
+  const { confirm, ConfirmDialog } = useConfirm();
   const [search, setSearch] = useState("");
   const [classFilter, setClassFilter] = useState("all");
   const [statusFilter, setStatusFilter] = useState("Active");
@@ -269,7 +271,7 @@ export default function StudentsPage() {
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end" className="rounded-xl">
                           <DropdownMenuItem onClick={() => navigate(`/students/${s.id}`)}><Eye className="w-4 h-4 mr-2" />View Details</DropdownMenuItem>
-                          <DropdownMenuItem onClick={() => { if (confirm("Delete student?")) deleteMutation.mutate(s.id); }} className="text-destructive">
+                          <DropdownMenuItem onClick={async () => { if (await confirm({ title: "Delete Student", description: `Remove ${s.name} from the system? All their records will be deleted.`, confirmLabel: "Delete", variant: "destructive" })) deleteMutation.mutate(s.id); }} className="text-destructive">
                             <Trash2 className="w-4 h-4 mr-2" />Delete
                           </DropdownMenuItem>
                         </DropdownMenuContent>
@@ -298,6 +300,7 @@ export default function StudentsPage() {
           <AddStudentForm onClose={() => setAddOpen(false)} />
         </DialogContent>
       </Dialog>
+      {ConfirmDialog}
     </div>
   );
 }

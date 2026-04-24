@@ -12,6 +12,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Plus, MessageSquare, Trash2 } from "lucide-react";
+import { useConfirm } from "@/hooks/use-confirm";
 import { format } from "date-fns";
 
 const REMARK_TYPES = ["General", "Behaviour", "Academic", "Health"];
@@ -25,6 +26,7 @@ const TYPE_COLORS: Record<string, string> = {
 export default function RemarksPage() {
   const { toast } = useToast();
   const qc = useQueryClient();
+  const { confirm, ConfirmDialog } = useConfirm();
   const { selectedBranchId, branchQuery } = useBranch();
   const [addOpen, setAddOpen] = useState(false);
   const [filterStudent, setFilterStudent] = useState("");
@@ -87,7 +89,7 @@ export default function RemarksPage() {
                     <td className="px-4 py-2.5"><Badge variant="outline" className={`text-xs ${TYPE_COLORS[r.remarkType] || ""}`}>{r.remarkType}</Badge></td>
                     <td className="px-4 py-2.5 text-muted-foreground max-w-xs">{r.remark}</td>
                     <td className="px-4 py-2.5">
-                      <Button variant="ghost" size="icon" className="h-7 w-7 text-destructive" onClick={() => { if (confirm("Delete this remark?")) deleteMutation.mutate(r.id); }}>
+                      <Button variant="ghost" size="icon" className="h-7 w-7 text-destructive" onClick={async () => { if (await confirm({ title: "Delete Remark", description: "This remark will be permanently removed.", confirmLabel: "Delete", variant: "destructive" })) deleteMutation.mutate(r.id); }}>
                         <Trash2 className="w-3.5 h-3.5" />
                       </Button>
                     </td>
@@ -126,6 +128,7 @@ export default function RemarksPage() {
           </div>
         </DialogContent>
       </Dialog>
+      {ConfirmDialog}
     </div>
   );
 }

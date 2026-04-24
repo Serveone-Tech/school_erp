@@ -11,6 +11,7 @@ import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Plus, Image as ImageIcon, Trash2, X, Cloud, CloudOff, CheckCircle2, AlertCircle, Upload, ExternalLink, Phone, Mail, MessageCircle, ChevronRight, Eye, EyeOff } from "lucide-react";
+import { useConfirm } from "@/hooks/use-confirm";
 import { format } from "date-fns";
 
 const CATEGORIES = ["Sports", "Annual Day", "Classroom", "Science Fair", "Cultural", "Trip", "Graduation", "Other"];
@@ -153,6 +154,7 @@ function CloudinarySetupPage({ onConnected }: { onConnected: () => void }) {
 export default function GalleryPage() {
   const { toast } = useToast();
   const qc = useQueryClient();
+  const { confirm, ConfirmDialog } = useConfirm();
   const { selectedBranchId, branchQuery } = useBranch();
   const [addOpen, setAddOpen] = useState(false);
   const [preview, setPreview] = useState<any>(null);
@@ -241,7 +243,7 @@ export default function GalleryPage() {
           <Button variant="outline" size="sm" className="gap-1.5 rounded-xl text-xs text-emerald-700 border-emerald-200 bg-emerald-50" disabled>
             <CheckCircle2 className="w-3.5 h-3.5" />Cloudinary Connected
           </Button>
-          <Button variant="ghost" size="sm" className="rounded-xl text-xs text-destructive" onClick={() => { if (confirm("Disconnect Cloudinary? You won't be able to upload new images.")) disconnectMutation.mutate(); }}>
+          <Button variant="ghost" size="sm" className="rounded-xl text-xs text-destructive" onClick={async () => { if (await confirm({ title: "Disconnect Cloudinary", description: "You won't be able to upload new images until you reconnect. Existing images will remain visible.", confirmLabel: "Disconnect", variant: "destructive" })) disconnectMutation.mutate(); }}>
             <CloudOff className="w-3.5 h-3.5 mr-1" />Disconnect
           </Button>
           <Button onClick={() => setAddOpen(true)} className="gap-1.5 rounded-xl shadow-md shadow-primary/20"><Plus className="w-4 h-4" />Add Image</Button>
@@ -276,7 +278,7 @@ export default function GalleryPage() {
               </div>
               <button
                 className="absolute top-2 right-2 w-6 h-6 rounded-lg bg-red-500 text-white opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center"
-                onClick={e => { e.stopPropagation(); if (confirm("Delete image?")) deleteMutation.mutate(img.id); }}
+                onClick={async e => { e.stopPropagation(); if (await confirm({ title: "Delete Image", description: "This image will be permanently removed from Cloudinary.", confirmLabel: "Delete", variant: "destructive" })) deleteMutation.mutate(img.id); }}
               >
                 <Trash2 className="w-3 h-3" />
               </button>
@@ -352,6 +354,7 @@ export default function GalleryPage() {
           </div>
         </div>
       )}
+      {ConfirmDialog}
     </div>
   );
 }

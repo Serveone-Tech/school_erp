@@ -12,6 +12,7 @@ import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Plus, Search, Trash2, Bell, Calendar } from "lucide-react";
+import { useConfirm } from "@/hooks/use-confirm";
 import { format } from "date-fns";
 
 const AUDIENCES = ["All","Students","Staff","Parents","Teachers"];
@@ -19,6 +20,7 @@ const AUDIENCES = ["All","Students","Staff","Parents","Teachers"];
 export default function NoticesPage() {
   const { toast } = useToast();
   const qc = useQueryClient();
+  const { confirm, ConfirmDialog } = useConfirm();
   const [search, setSearch] = useState("");
   const { selectedBranchId, branchQuery } = useBranch();
   const [audienceFilter, setAudienceFilter] = useState("all");
@@ -95,7 +97,7 @@ export default function NoticesPage() {
                     <span>{n.publishDate ? format(new Date(n.publishDate), "dd MMM yyyy, hh:mm a") : "—"}</span>
                   </div>
                 </div>
-                <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive flex-shrink-0" onClick={() => { if (confirm("Delete notice?")) deleteMutation.mutate(n.id); }}>
+                <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive flex-shrink-0" onClick={async () => { if (await confirm({ title: "Delete Notice", description: "This notice will be permanently deleted.", confirmLabel: "Delete", variant: "destructive" })) deleteMutation.mutate(n.id); }}>
                   <Trash2 className="w-3.5 h-3.5" />
                 </Button>
               </div>
@@ -150,6 +152,7 @@ export default function NoticesPage() {
           </DialogContent>
         </Dialog>
       )}
+      {ConfirmDialog}
     </div>
   );
 }

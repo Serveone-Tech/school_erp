@@ -14,6 +14,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardContent } from "@/components/ui/card";
 import { Plus, Search, CreditCard, IndianRupee, TrendingUp, Receipt, Trash2, AlertCircle, CheckCircle2, Info } from "lucide-react";
+import { useConfirm } from "@/hooks/use-confirm";
 import { format } from "date-fns";
 
 const MONTHS = ["April","May","June","July","August","September","October","November","December","January","February","March"];
@@ -22,6 +23,7 @@ const PAYMENT_MODES = ["Cash","Online","Cheque","DD","UPI","NEFT"];
 export default function FeesPage() {
   const { toast } = useToast();
   const qc = useQueryClient();
+  const { confirm, ConfirmDialog } = useConfirm();
   const [tab, setTab] = useState("payments");
   const [search, setSearch] = useState("");
   const [addPayOpen, setAddPayOpen] = useState(false);
@@ -149,7 +151,7 @@ export default function FeesPage() {
                       {s.description && <p className="text-xs text-muted-foreground mt-1">{s.description}</p>}
                     </div>
                     <Button variant="ghost" size="icon" className="h-7 w-7 text-destructive shrink-0"
-                      onClick={() => { if (confirm(`Delete "${s.name}"?`)) deleteStructure.mutate(s.id); }}>
+                      onClick={async () => { if (await confirm({ title: "Delete Fee Structure", description: `Remove "${s.name}"? Existing payment records will not be affected.`, confirmLabel: "Delete", variant: "destructive" })) deleteStructure.mutate(s.id); }}>
                       <Trash2 className="w-3.5 h-3.5" />
                     </Button>
                   </div>
@@ -178,6 +180,7 @@ export default function FeesPage() {
           <AddStructureForm classes={classes} onClose={() => setAddStructOpen(false)} onSuccess={() => { qc.invalidateQueries({ queryKey: ["/api/fees/structure"] }); setAddStructOpen(false); }} />
         </DialogContent>
       </Dialog>
+      {ConfirmDialog}
     </div>
   );
 }

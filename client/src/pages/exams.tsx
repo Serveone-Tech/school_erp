@@ -12,10 +12,12 @@ import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Plus, Search, Trash2, FileText, Eye, Edit3, Trophy, TrendingUp, Users, CheckCircle, XCircle, Printer } from "lucide-react";
+import { useConfirm } from "@/hooks/use-confirm";
 
 export default function ExamsPage() {
   const { toast } = useToast();
   const qc = useQueryClient();
+  const { confirm, ConfirmDialog } = useConfirm();
   const [search, setSearch] = useState("");
   const [addOpen, setAddOpen] = useState(false);
   const [resultsExam, setResultsExam] = useState<any>(null);
@@ -83,7 +85,7 @@ export default function ExamsPage() {
                         <Button variant="outline" size="sm" className="h-7 text-xs rounded-lg gap-1" onClick={() => setResultsExam(e)}>
                           <Edit3 className="w-3 h-3" />Enter
                         </Button>
-                        <Button variant="ghost" size="icon" className="h-7 w-7 text-destructive" onClick={() => { if (confirm("Delete?")) deleteMutation.mutate(e.id); }}><Trash2 className="w-3.5 h-3.5" /></Button>
+                        <Button variant="ghost" size="icon" className="h-7 w-7 text-destructive" onClick={async () => { if (await confirm({ title: "Delete Exam", description: "This will permanently delete the exam and all its results.", confirmLabel: "Delete", variant: "destructive" })) deleteMutation.mutate(e.id); }}><Trash2 className="w-3.5 h-3.5" /></Button>
                       </div>
                     </td>
                   </tr>
@@ -141,6 +143,7 @@ export default function ExamsPage() {
 
       {resultsExam && <ResultsDialog exam={resultsExam} onClose={() => setResultsExam(null)} />}
       {viewExam && <ViewResultsDialog exam={viewExam} classes={classes} subjects={subjects} onClose={() => setViewExam(null)} onEdit={() => { setResultsExam(viewExam); setViewExam(null); }} />}
+      {ConfirmDialog}
     </div>
   );
 }

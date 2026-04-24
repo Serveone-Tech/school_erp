@@ -13,6 +13,7 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select";
 import { Plus, Search, Trash2, Bus, MapPin, Copy, Check, Navigation, Signal, Settings, Cpu, Link2, Unlink, Eye, EyeOff } from "lucide-react";
+import { useConfirm } from "@/hooks/use-confirm";
 import "leaflet/dist/leaflet.css";
 
 // Fix Leaflet default marker icons
@@ -335,6 +336,7 @@ function LinkDeviceModal({ route, open, onClose }: { route: any; open: boolean; 
 export default function TransportPage() {
   const { toast } = useToast();
   const qc = useQueryClient();
+  const { confirm, ConfirmDialog } = useConfirm();
   const [search, setSearch] = useState("");
   const [addOpen, setAddOpen] = useState(false);
   const [gpsSettingsOpen, setGpsSettingsOpen] = useState(false);
@@ -407,7 +409,7 @@ export default function TransportPage() {
                       <p className="font-semibold">{r.routeName}</p>
                       <Badge variant="outline" className="text-xs mt-1">{r.vehicleNo || "No Vehicle"}</Badge>
                     </div>
-                    <Button variant="ghost" size="icon" className="h-7 w-7 text-destructive" onClick={() => { if (confirm("Delete route?")) deleteMutation.mutate(r.id); }}>
+                    <Button variant="ghost" size="icon" className="h-7 w-7 text-destructive" onClick={async () => { if (await confirm({ title: "Delete Route", description: `Remove route "${r.routeName}"? This cannot be undone.`, confirmLabel: "Delete", variant: "destructive" })) deleteMutation.mutate(r.id); }}>
                       <Trash2 className="w-3.5 h-3.5" />
                     </Button>
                   </div>
@@ -484,6 +486,7 @@ export default function TransportPage() {
       {linkDeviceRoute && (
         <LinkDeviceModal route={linkDeviceRoute} open={!!linkDeviceRoute} onClose={() => setLinkDeviceRoute(null)} />
       )}
+      {ConfirmDialog}
     </div>
   );
 }

@@ -12,12 +12,14 @@ import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Plus, Search, Trash2, ClipboardList, CalendarDays, BookOpen } from "lucide-react";
+import { useConfirm } from "@/hooks/use-confirm";
 import { format, isPast } from "date-fns";
 
 
 export default function HomeworkPage() {
   const { toast } = useToast();
   const qc = useQueryClient();
+  const { confirm, ConfirmDialog } = useConfirm();
   const [search, setSearch] = useState("");
   const [classFilter, setClassFilter] = useState("all");
   const [addOpen, setAddOpen] = useState(false);
@@ -83,7 +85,7 @@ export default function HomeworkPage() {
                     <p className="font-semibold text-sm line-clamp-2">{h.title}</p>
                     {h.description && <p className="text-xs text-muted-foreground mt-1 line-clamp-2">{h.description}</p>}
                   </div>
-                  <Button variant="ghost" size="icon" className="h-7 w-7 text-destructive flex-shrink-0" onClick={() => { if (confirm("Delete?")) deleteMutation.mutate(h.id); }}>
+                  <Button variant="ghost" size="icon" className="h-7 w-7 text-destructive flex-shrink-0" onClick={async () => { if (await confirm({ title: "Delete Homework", description: "This assignment will be permanently removed.", confirmLabel: "Delete", variant: "destructive" })) deleteMutation.mutate(h.id); }}>
                     <Trash2 className="w-3.5 h-3.5" />
                   </Button>
                 </div>
@@ -135,6 +137,7 @@ export default function HomeworkPage() {
           </div>
         </DialogContent>
       </Dialog>
+      {ConfirmDialog}
     </div>
   );
 }

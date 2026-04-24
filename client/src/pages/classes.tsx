@@ -14,6 +14,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardContent } from "@/components/ui/card";
 import { Plus, Trash2, BookOpen, Users, ChevronDown, ChevronRight, Pencil } from "lucide-react";
+import { useConfirm } from "@/hooks/use-confirm";
 
 const apiPost = (path: string, data: any) => fetch(path, { method: "POST", credentials: "include", headers: { "Content-Type": "application/json" }, body: JSON.stringify(data) }).then(r => r.json());
 const apiPut = (path: string, data: any) => fetch(path, { method: "PUT", credentials: "include", headers: { "Content-Type": "application/json" }, body: JSON.stringify(data) }).then(r => r.json());
@@ -53,6 +54,7 @@ function FormDialog({ open, onClose, title, fields, onSave, loading }: any) {
 export default function ClassesPage() {
   const { toast } = useToast();
   const qc = useQueryClient();
+  const { confirm, ConfirmDialog } = useConfirm();
   const [tab, setTab] = useState("classes");
   const [expandedClass, setExpandedClass] = useState<number | null>(null);
   const [dialogs, setDialogs] = useState({ addClass: false, addSection: false, addSubject: false, addYear: false });
@@ -165,7 +167,7 @@ export default function ClassesPage() {
                       <Plus className="w-3 h-3" />Add Section
                     </Button>
                     <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive hover:text-destructive"
-                      onClick={() => { if (confirm(`Delete ${cls.name}?`)) removeClass.mutate(cls.id); }}>
+                      onClick={async () => { if (await confirm({ title: "Delete Class", description: `Delete "${cls.name}" and all its sections? Students in this class will be unassigned.`, confirmLabel: "Delete", variant: "destructive" })) removeClass.mutate(cls.id); }}>
                       <Trash2 className="w-3.5 h-3.5" />
                     </Button>
                   </div>
@@ -185,7 +187,7 @@ export default function ClassesPage() {
                             <button className="ml-1 text-muted-foreground hover:text-primary transition-colors" onClick={() => { setEditSection(sec); setEditSectionForm({ name: sec.name, capacity: sec.capacity || 40 }); }}>
                               <Pencil className="w-3 h-3" />
                             </button>
-                            <button className="text-muted-foreground hover:text-destructive transition-colors" onClick={() => { if (confirm(`Delete Section ${sec.name}?`)) deleteSection.mutate(sec.id); }}>
+                            <button className="text-muted-foreground hover:text-destructive transition-colors" onClick={async () => { if (await confirm({ title: "Delete Section", description: `Remove section "${sec.name}"?`, confirmLabel: "Delete", variant: "destructive" })) deleteSection.mutate(sec.id); }}>
                               <Trash2 className="w-3 h-3" />
                             </button>
                           </div>
@@ -295,6 +297,7 @@ export default function ClassesPage() {
       <FormDialog open={dialogs.addYear} onClose={() => close("addYear")} title="Add Academic Year"
         fields={[{ key: "name", label: "Year Name *", placeholder: "2024-25" }, { key: "startDate", label: "Start Date *", type: "date" }, { key: "endDate", label: "End Date *", type: "date" }]}
         onSave={(d: any) => addYear.mutate(d)} loading={addYear.isPending} />
+      {ConfirmDialog}
     </div>
   );
 }

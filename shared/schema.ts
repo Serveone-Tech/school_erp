@@ -200,11 +200,22 @@ export const students = pgTable("students", {
 // ─── Student Admission (from enquiry to admission) ────────────────────────────
 export const admissions = pgTable("admissions", {
   id: serial("id").primaryKey(),
-  studentId: integer("student_id").references(() => students.id),
-  enquiryId: integer("enquiry_id"),
+  studentId: integer("student_id").references(() => students.id), // set after "Admit as Student"
   applicationNo: text("application_no"),
-  admissionDate: timestamp("admission_date"),
+  // Applicant details
+  applicantName: text("applicant_name").notNull().default(""),
+  gender: text("gender"),
+  dob: text("dob"),
+  phone: text("phone"),
+  email: text("email"),
+  address: text("address"),
+  fatherName: text("father_name"),
+  motherName: text("mother_name"),
+  fatherPhone: text("father_phone"),
+  fatherEmail: text("father_email"),
+  // Academic
   classApplied: text("class_applied"),
+  admissionDate: timestamp("admission_date"),
   status: text("status").default("Pending"), // Pending | Approved | Rejected
   remarks: text("remarks"),
   adminId: integer("admin_id").references(() => users.id).notNull(),

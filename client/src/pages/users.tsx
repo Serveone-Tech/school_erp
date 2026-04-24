@@ -30,6 +30,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { useToast } from "@/hooks/use-toast";
+import { useConfirm } from "@/hooks/use-confirm";
 import {
   Plus,
   Edit,
@@ -98,6 +99,7 @@ const emptyForm = {
 export default function UsersPage() {
   const { toast } = useToast();
   const { user: currentUser } = useAuth();
+  const { confirm, ConfirmDialog } = useConfirm();
   const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState<SystemUser | null>(null);
   const [form, setForm] = useState(emptyForm);
@@ -368,8 +370,8 @@ export default function UsersPage() {
                           variant="ghost"
                           size="icon"
                           className="h-7 w-7 text-destructive hover:text-destructive"
-                          onClick={() => {
-                            if (confirm(`Remove user ${u.name}?`))
+                          onClick={async () => {
+                            if (await confirm({ title: "Remove User", description: `Remove "${u.name}" from the system? They will no longer be able to log in.`, confirmLabel: "Remove", variant: "destructive" }))
                               deleteMut.mutate(u.id);
                           }}
                           data-testid={`button-delete-user-${u.id}`}
@@ -767,6 +769,7 @@ export default function UsersPage() {
           </div>
         )}
       </div>
+      {ConfirmDialog}
     </div>
   );
 }
