@@ -59,7 +59,6 @@ export default function ClassesPage() {
   const [expandedClass, setExpandedClass] = useState<number | null>(null);
   const [dialogs, setDialogs] = useState({ addClass: false, addSection: false, addSubject: false, addYear: false });
   const [sectionClassId, setSectionClassId] = useState<number | null>(null);
-  const [classSections, setClassSections] = useState<Record<number, any[]>>({});
   const { selectedBranchId, branchQuery } = useBranch();
   const [classForm, setClassForm] = useState<any>({ branchId: selectedBranchId ?? null });
   const setC = (k: string, v: any) => setClassForm((p: any) => ({ ...p, [k]: v }));
@@ -73,16 +72,17 @@ export default function ClassesPage() {
   const { data: classes = [] } = useQuery({ queryKey: ["/api/classes", selectedBranchId], queryFn: () => apiFetch(`/api/classes${branchQuery}`) });
   const { data: subjects = [] } = useQuery({ queryKey: ["/api/classes/subjects/all"], queryFn: () => apiFetch("/api/classes/subjects/all") });
   const { data: academicYears = [] } = useQuery({ queryKey: ["/api/classes/academic-years"], queryFn: () => apiFetch("/api/classes/academic-years") });
+  const { data: allSectionsRaw = [] } = useQuery({ queryKey: ["/api/classes/all-sections"], queryFn: () => apiFetch("/api/classes/all-sections") });
 
-  const loadSections = async (classId: number) => {
-    if (classSections[classId]) return;
-    const data = await apiFetch(`/api/classes/${classId}/sections`);
-    setClassSections(prev => ({ ...prev, [classId]: Array.isArray(data) ? data : [] }));
-  };
+  // Group sections by classId for O(1) lookup
+  const classSections: Record<number, any[]> = {};
+  for (const sec of allSectionsRaw) {
+    if (!classSections[sec.classId]) classSections[sec.classId] = [];
+    classSections[sec.classId].push(sec);
+  }
 
   const toggleClass = (classId: number) => {
-    if (expandedClass === classId) { setExpandedClass(null); }
-    else { setExpandedClass(classId); loadSections(classId); }
+    setExpandedClass(prev => prev === classId ? null : classId);
   };
 
   const removeClass = useMutation({
@@ -98,7 +98,7 @@ export default function ClassesPage() {
   const addSection = useMutation({
     mutationFn: (data: any) => apiPost(`/api/classes/${sectionClassId}/sections`, { ...data, classId: sectionClassId, capacity: Number(data.capacity) || 40 }),
     onSuccess: () => {
-      if (sectionClassId) { setClassSections(p => ({ ...p, [sectionClassId]: undefined as any })); loadSections(sectionClassId); }
+      qc.invalidateQueries({ queryKey: ["/api/classes/all-sections"] });
       toast({ title: "Section added" }); close("addSection");
     },
   });
@@ -115,18 +115,16 @@ export default function ClassesPage() {
 
   const updateSection = useMutation({
     mutationFn: ({ id, data }: { id: number; data: any }) => apiPut(`/api/classes/sections/${id}`, { ...data, capacity: Number(data.capacity) || 40 }),
-    onSuccess: (_res, { id }) => {
-      const classId = Object.keys(classSections).find(cid => classSections[Number(cid)]?.some((s: any) => s.id === id));
-      if (classId) { setClassSections(p => ({ ...p, [classId]: undefined as any })); loadSections(Number(classId)); }
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["/api/classes/all-sections"] });
       toast({ title: "Section updated" }); setEditSection(null);
     },
   });
 
   const deleteSection = useMutation({
     mutationFn: (id: number) => apiDelete(`/api/classes/sections/${id}`),
-    onSuccess: (_res, id) => {
-      const classId = Object.keys(classSections).find(cid => classSections[Number(cid)]?.some((s: any) => s.id === id));
-      if (classId) { setClassSections(p => ({ ...p, [classId]: p[Number(classId)]?.filter((s: any) => s.id !== id) })); }
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["/api/classes/all-sections"] });
       toast({ title: "Section deleted" });
     },
   });

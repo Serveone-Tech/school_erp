@@ -112,14 +112,14 @@ export default function HomeworkPage() {
             <div className="grid grid-cols-2 gap-3">
               <div className="space-y-1.5">
                 <Label className="text-xs">Class *</Label>
-                <Select value={form.classId || "_"} onValueChange={v => set("classId", v === "_" ? null : Number(v))}>
+                <Select value={form.classId || "_"} onValueChange={v => set("classId", v === "_" ? "" : v)}>
                   <SelectTrigger className="rounded-xl h-9"><SelectValue placeholder="Select Class" /></SelectTrigger>
                   <SelectContent><SelectItem value="_">Select</SelectItem>{classes.map((c: any) => <SelectItem key={c.id} value={String(c.id)}>{c.name}</SelectItem>)}</SelectContent>
                 </Select>
               </div>
               <div className="space-y-1.5">
                 <Label className="text-xs">Subject</Label>
-                <Select value={form.subjectId || "_"} onValueChange={v => set("subjectId", v === "_" ? null : Number(v))}>
+                <Select value={form.subjectId || "_"} onValueChange={v => set("subjectId", v === "_" ? "" : v)}>
                   <SelectTrigger className="rounded-xl h-9"><SelectValue placeholder="Select Subject" /></SelectTrigger>
                   <SelectContent><SelectItem value="_">Select</SelectItem>{subjects.map((s: any) => <SelectItem key={s.id} value={String(s.id)}>{s.name}</SelectItem>)}</SelectContent>
                 </Select>
@@ -130,7 +130,7 @@ export default function HomeworkPage() {
             </div>
             <div className="flex gap-2 pt-1">
               <Button variant="outline" className="flex-1" onClick={() => setAddOpen(false)}>Cancel</Button>
-              <Button className="flex-1" onClick={() => createMutation.mutate(form)} disabled={createMutation.isPending || !form.title || !form.classId || !form.dueDate}>
+              <Button className="flex-1" onClick={() => createMutation.mutate({ ...form, classId: form.classId ? Number(form.classId) : null, subjectId: form.subjectId ? Number(form.subjectId) : null })} disabled={createMutation.isPending || !form.title || !form.classId || !form.dueDate}>
                 {createMutation.isPending ? "Saving..." : "Assign"}
               </Button>
             </div>

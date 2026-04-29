@@ -13,9 +13,10 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardContent } from "@/components/ui/card";
-import { Plus, Search, CreditCard, IndianRupee, TrendingUp, Receipt, Trash2, AlertCircle, CheckCircle2, Info } from "lucide-react";
+import { Plus, Search, CreditCard, TrendingUp, Receipt, Trash2, AlertCircle, CheckCircle2, Info, DollarSign } from "lucide-react";
 import { useConfirm } from "@/hooks/use-confirm";
 import { format } from "date-fns";
+import { useCurrency } from "@/contexts/currency";
 
 const MONTHS = ["April","May","June","July","August","September","October","November","December","January","February","March"];
 const PAYMENT_MODES = ["Cash","Online","Cheque","DD","UPI","NEFT"];
@@ -24,6 +25,7 @@ export default function FeesPage() {
   const { toast } = useToast();
   const qc = useQueryClient();
   const { confirm, ConfirmDialog } = useConfirm();
+  const currency = useCurrency();
   const [tab, setTab] = useState("payments");
   const [search, setSearch] = useState("");
   const [addPayOpen, setAddPayOpen] = useState(false);
@@ -60,14 +62,14 @@ export default function FeesPage() {
       <div className="grid grid-cols-3 gap-4">
         <Card className="rounded-2xl border-border/50 shadow-sm">
           <CardContent className="p-4 flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-emerald-50 flex items-center justify-center"><IndianRupee className="w-5 h-5 text-emerald-600" /></div>
-            <div><p className="text-xs text-muted-foreground">Total Collected</p><p className="font-bold text-lg">₹{totalCollected.toLocaleString("en-IN")}</p></div>
+            <div className="w-10 h-10 rounded-xl bg-emerald-50 flex items-center justify-center"><DollarSign className="w-5 h-5 text-emerald-600" /></div>
+            <div><p className="text-xs text-muted-foreground">Total Collected</p><p className="font-bold text-lg">{currency.format(totalCollected)}</p></div>
           </CardContent>
         </Card>
         <Card className="rounded-2xl border-border/50 shadow-sm">
           <CardContent className="p-4 flex items-center gap-3">
             <div className="w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center"><TrendingUp className="w-5 h-5 text-blue-600" /></div>
-            <div><p className="text-xs text-muted-foreground">Today's Collection</p><p className="font-bold text-lg">₹{todayCollected.toLocaleString("en-IN")}</p></div>
+            <div><p className="text-xs text-muted-foreground">Today's Collection</p><p className="font-bold text-lg">{currency.format(todayCollected)}</p></div>
           </CardContent>
         </Card>
         <Card className="rounded-2xl border-border/50 shadow-sm">
@@ -113,9 +115,9 @@ export default function FeesPage() {
                       <td className="px-3 py-2.5 font-medium">{student?.name || "—"}</td>
                       <td className="px-3 py-2.5"><Badge variant="outline" className="text-xs">{struct?.name || "—"}</Badge></td>
                       <td className="px-3 py-2.5 text-muted-foreground">{p.month || "—"}</td>
-                      <td className="px-3 py-2.5">₹{(p.amount || 0).toLocaleString("en-IN")}</td>
-                      <td className="px-3 py-2.5 text-emerald-600">{p.discount ? `₹${p.discount}` : "—"}</td>
-                      <td className="px-3 py-2.5 font-semibold">₹{(p.netAmount || 0).toLocaleString("en-IN")}</td>
+                      <td className="px-3 py-2.5">{currency.format(p.amount || 0)}</td>
+                      <td className="px-3 py-2.5 text-emerald-600">{p.discount ? currency.format(p.discount) : "—"}</td>
+                      <td className="px-3 py-2.5 font-semibold">{currency.format(p.netAmount || 0)}</td>
                       <td className="px-3 py-2.5"><Badge variant="outline" className="text-xs">{p.paymentMode}</Badge></td>
                       <td className="px-3 py-2.5 text-xs text-muted-foreground">{p.paymentDate ? format(new Date(p.paymentDate), "dd MMM yyyy") : "—"}</td>
                       <td className="px-3 py-2.5"><Badge variant="outline" className={p.status === "Paid" ? "text-xs border-emerald-200 text-emerald-700 bg-emerald-50" : "text-xs border-amber-200 text-amber-700"}>{p.status}</Badge></td>
@@ -145,7 +147,7 @@ export default function FeesPage() {
                       <p className="font-semibold text-sm">{s.name}</p>
                       <p className="text-xs text-muted-foreground mt-0.5">{cls?.name || "All Classes"}</p>
                       <div className="flex items-center gap-2 mt-2">
-                        <span className="text-lg font-bold text-primary">₹{s.amount.toLocaleString("en-IN")}</span>
+                        <span className="text-lg font-bold text-primary">{currency.format(s.amount)}</span>
                         <Badge variant="outline" className="text-xs">{s.frequency}</Badge>
                       </div>
                       {s.description && <p className="text-xs text-muted-foreground mt-1">{s.description}</p>}
@@ -208,7 +210,7 @@ function AddStructureForm({ classes, onClose, onSuccess }: { classes: any[]; onC
         </Select>
       </div>
       <div className="grid grid-cols-2 gap-3">
-        <div className="space-y-1.5"><Label className="text-xs">Amount (₹) *</Label><Input type="number" value={form.amount || ""} onChange={e => set("amount", e.target.value)} className="rounded-xl h-9" /></div>
+        <div className="space-y-1.5"><Label className="text-xs">Amount *</Label><Input type="number" value={form.amount || ""} onChange={e => set("amount", e.target.value)} className="rounded-xl h-9" /></div>
         <div className="space-y-1.5">
           <Label className="text-xs">Frequency</Label>
           <Select value={form.frequency} onValueChange={v => set("frequency", v)}>
@@ -231,6 +233,7 @@ function AddStructureForm({ classes, onClose, onSuccess }: { classes: any[]; onC
 // ── Collect Fee Dialog ─────────────────────────────────────────────────────────
 function CollectFeeDialog({ students, structures, classes, branchId, onClose, onSuccess }: { students: any[]; structures: any[]; classes: any[]; branchId: number | null; onClose: () => void; onSuccess: () => void }) {
   const { toast } = useToast();
+  const currency = useCurrency();
   const [form, setForm] = useState<any>({
     paymentDate: format(new Date(), "yyyy-MM-dd"),
     paymentMode: "Cash",
@@ -333,12 +336,12 @@ function CollectFeeDialog({ students, structures, classes, branchId, onClose, on
               {remainingLoading ? (
                 <><Info className="w-4 h-4 text-muted-foreground mt-0.5 shrink-0" /><span className="text-muted-foreground">Calculating remaining balance...</span></>
               ) : remaining?.remaining === 0 ? (
-                <><CheckCircle2 className="w-4 h-4 text-emerald-600 mt-0.5 shrink-0" /><span className="text-emerald-700">Fee fully paid. Already paid: <b>₹{remaining.totalPaid.toLocaleString("en-IN")}</b>{form.month ? ` for ${form.month}` : ""}.</span></>
+                <><CheckCircle2 className="w-4 h-4 text-emerald-600 mt-0.5 shrink-0" /><span className="text-emerald-700">Fee fully paid. Already paid: <b>{currency.format(remaining.totalPaid)}</b>{form.month ? ` for ${form.month}` : ""}.</span></>
               ) : remaining ? (
                 <><AlertCircle className="w-4 h-4 text-blue-600 mt-0.5 shrink-0" /><span className="text-blue-700">
-                  Structure amount: <b>₹{remaining.structureAmount.toLocaleString("en-IN")}</b>
-                  {remaining.totalPaid > 0 && <> · Already paid: <b>₹{remaining.totalPaid.toLocaleString("en-IN")}</b></>}
-                  {remaining.totalPaid > 0 && <> · <b className="text-blue-800">Remaining: ₹{remaining.remaining.toLocaleString("en-IN")}</b></>}
+                  Structure amount: <b>{currency.format(remaining.structureAmount)}</b>
+                  {remaining.totalPaid > 0 && <> · Already paid: <b>{currency.format(remaining.totalPaid)}</b></>}
+                  {remaining.totalPaid > 0 && <> · <b className="text-blue-800">Remaining: {currency.format(remaining.remaining)}</b></>}
                 </span></>
               ) : null}
             </div>
@@ -356,19 +359,19 @@ function CollectFeeDialog({ students, structures, classes, branchId, onClose, on
 
             {/* Amount */}
             <div className="space-y-1.5">
-              <Label className="text-xs">Amount (₹) *</Label>
+              <Label className="text-xs">Amount ({currency.symbol}) *</Label>
               <Input type="number" value={form.amount || ""} onChange={e => set("amount", e.target.value)} className="rounded-xl h-9" placeholder="Auto-filled" />
             </div>
 
             {/* Discount */}
             <div className="space-y-1.5">
-              <Label className="text-xs">Discount (₹)</Label>
+              <Label className="text-xs">Discount ({currency.symbol})</Label>
               <Input type="number" value={form.discount || ""} onChange={e => set("discount", e.target.value)} className="rounded-xl h-9" placeholder="0" />
             </div>
 
             {/* Fine */}
             <div className="space-y-1.5">
-              <Label className="text-xs">Fine / Late Fee (₹)</Label>
+              <Label className="text-xs">Fine / Late Fee ({currency.symbol})</Label>
               <Input type="number" value={form.fine || ""} onChange={e => set("fine", e.target.value)} className="rounded-xl h-9" placeholder="0" />
             </div>
 
@@ -392,7 +395,7 @@ function CollectFeeDialog({ students, structures, classes, branchId, onClose, on
           {form.amount && (
             <div className="bg-muted/50 rounded-xl px-4 py-2.5 flex items-center justify-between">
               <span className="text-xs text-muted-foreground">Net Payable</span>
-              <span className="text-base font-bold text-primary">₹{netAmount.toLocaleString("en-IN")}</span>
+              <span className="text-base font-bold text-primary">{currency.format(netAmount)}</span>
             </div>
           )}
 

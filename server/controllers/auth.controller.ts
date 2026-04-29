@@ -148,8 +148,16 @@ export const AuthController = {
 
   // User management (admin only)
   async listUsers(req: Request, res: Response) {
-    const users = await storage.getUsers();
-    res.json(users);
+    // rootAdminId is the ID of the admin who owns this school tenant.
+    // Sub-users have req.session.adminId set to their creator's id.
+    const rootAdminId: number = (req.session as any).adminId ?? req.session.userId!;
+    const [ownRecord, subUsers] = await Promise.all([
+      storage.getUser(rootAdminId),
+      storage.getUsers({ adminId: rootAdminId }),
+    ]);
+    const allUsers = [ownRecord, ...subUsers].filter(Boolean) as any[];
+    const safe = allUsers.map(({ passwordHash, ...u }: any) => u);
+    res.json(safe);
   },
 
   async createUser(req: Request, res: Response) {
@@ -168,7 +176,8 @@ export const AuthController = {
       if (existing) return res.status(400).json({ message: "Email already in use" });
 
       const passwordHash = await bcrypt.hash(data.password, 10);
-      const creatingAdminId = (req.session as any).userId;
+      // Always scope sub-users under the root admin (not a sub-admin)
+      const rootAdminId: number = (req.session as any).adminId ?? (req.session as any).userId;
       const user = await storage.createUser({
         name: data.name,
         email: data.email,
@@ -177,8 +186,8 @@ export const AuthController = {
         permissions: data.permissions,
         branchId: data.branchId ?? null,
         isActive: data.isActive,
-        adminId: creatingAdminId,   // scope this user under the creating admin
-        isOnboarded: true,          // sub-users skip onboarding
+        adminId: rootAdminId,
+        isOnboarded: true,   // sub-users skip onboarding
         organizationId: null,
       } as any);
       const { passwordHash: _, ...safeUser } = user;
@@ -191,6 +200,12 @@ export const AuthController = {
 
   async updateUser(req: Request, res: Response) {
     const id = Number(req.params.id);
+    const rootAdminId: number = (req.session as any).adminId ?? req.session.userId!;
+    const target = await storage.getUser(id);
+    // Only allow editing own sub-users (or self)
+    if (!target || (target.id !== rootAdminId && target.adminId !== rootAdminId)) {
+      return res.status(403).json({ message: "Access denied" });
+    }
     const schema = z.object({
       name: z.string().optional(),
       role: z.enum(ROLES).optional(),
@@ -218,6 +233,12 @@ export const AuthController = {
   async deleteUser(req: Request, res: Response) {
     const id = Number(req.params.id);
     if (id === req.session.userId) return res.status(400).json({ message: "Cannot delete your own account" });
+    const rootAdminId: number = (req.session as any).adminId ?? req.session.userId!;
+    const target = await storage.getUser(id);
+    // Only allow deleting own sub-users
+    if (!target || target.adminId !== rootAdminId) {
+      return res.status(403).json({ message: "Access denied" });
+    }
     await storage.deleteUser(id);
     res.status(204).send();
   },

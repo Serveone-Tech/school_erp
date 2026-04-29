@@ -1,5 +1,5 @@
 // client/src/pages/staff.tsx
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useBranch } from "@/contexts/branch";
 import { BranchSelectField } from "@/components/branch-select-field";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
@@ -23,6 +23,26 @@ function AddStaffForm({ onClose }: { onClose: () => void }) {
   const { selectedBranchId } = useBranch();
   const [form, setForm] = useState<any>({ status: "Active", designation: "Teacher", branchId: selectedBranchId ?? null });
   const set = (k: string, v: any) => setForm((p: any) => ({ ...p, [k]: v }));
+  const autoIdSet = useRef(false);
+
+  // Fetch all staff (no branch filter) to determine next unique Employee ID
+  const { data: allStaff = [], isLoading: staffLoading } = useQuery({
+    queryKey: ["/api/staff/all-for-id"],
+    queryFn: async () => { const r = await fetch("/api/staff", { credentials: "include" }); return r.json(); },
+    staleTime: 0,
+  });
+
+  useEffect(() => {
+    if (staffLoading || autoIdSet.current) return;
+    autoIdSet.current = true;
+    const nums = (allStaff as any[])
+      .map(s => s.employeeId)
+      .filter((id: string) => id && /^EMP\d+$/i.test(id))
+      .map((id: string) => parseInt(id.replace(/^EMP/i, ""), 10))
+      .filter(n => !isNaN(n));
+    const next = nums.length > 0 ? Math.max(...nums) + 1 : 1;
+    set("employeeId", `EMP${String(next).padStart(3, "0")}`);
+  }, [staffLoading, allStaff]);
 
   const mutation = useMutation({
     mutationFn: async (data: any) => {
@@ -38,7 +58,10 @@ function AddStaffForm({ onClose }: { onClose: () => void }) {
     <div className="space-y-3 max-h-[65vh] overflow-y-auto pr-1">
       <div className="grid grid-cols-2 gap-3">
         <div className="space-y-1.5"><Label className="text-xs">Full Name *</Label><Input value={form.name || ""} onChange={e => set("name", e.target.value)} className="rounded-xl h-9" /></div>
-        <div className="space-y-1.5"><Label className="text-xs">Employee ID</Label><Input value={form.employeeId || ""} onChange={e => set("employeeId", e.target.value)} className="rounded-xl h-9" placeholder="EMP001" /></div>
+        <div className="space-y-1.5">
+          <Label className="text-xs">Employee ID</Label>
+          <Input value={form.employeeId || ""} onChange={e => set("employeeId", e.target.value)} className="rounded-xl h-9" placeholder={staffLoading ? "Generating..." : "EMP001"} disabled={staffLoading} />
+        </div>
         <div className="space-y-1.5"><Label className="text-xs">Phone *</Label><Input value={form.phone || ""} onChange={e => set("phone", e.target.value)} className="rounded-xl h-9" type="tel" /></div>
         <div className="space-y-1.5"><Label className="text-xs">Email</Label><Input value={form.email || ""} onChange={e => set("email", e.target.value)} className="rounded-xl h-9" type="email" /></div>
         <div className="space-y-1.5">

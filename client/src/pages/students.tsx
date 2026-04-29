@@ -1,5 +1,5 @@
 // client/src/pages/students.tsx
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useBranch } from "@/contexts/branch";
 import { BranchSelectField } from "@/components/branch-select-field";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
@@ -44,14 +44,32 @@ function AddStudentForm({ onClose }: { onClose: () => void }) {
     category: "", religion: "", nationality: "Indian", aadharNo: "",
     status: "Active", branchId: selectedBranchId ?? null,
   });
-  const [sections, setSections] = useState<any[]>([]);
+  const { data: sections = [] } = useSections(form.classId ? Number(form.classId) : undefined);
+  const rollNoManuallyEdited = useRef(false);
+
+  const { data: classSectionStudents = [], isFetching: fetchingRollNo } = useQuery({
+    queryKey: ["/api/students/for-rollno", form.classId, form.sectionId],
+    enabled: !!form.classId,
+    staleTime: 0,
+    queryFn: async () => {
+      const params = new URLSearchParams({ classId: form.classId });
+      if (form.sectionId) params.set("sectionId", form.sectionId);
+      const r = await fetch(`/api/students?${params}`, { credentials: "include" });
+      return r.json();
+    },
+  });
+
+  useEffect(() => {
+    if (fetchingRollNo || rollNoManuallyEdited.current) return;
+    const nums = (classSectionStudents as any[])
+      .map((s: any) => s.rollNo)
+      .filter((r: any) => r && /^\d+$/.test(String(r)))
+      .map(Number);
+    const next = nums.length > 0 ? Math.max(...nums) + 1 : 1;
+    setForm((f: any) => ({ ...f, rollNo: String(next) }));
+  }, [fetchingRollNo, classSectionStudents]);
 
   const set = (k: string, v: any) => setForm((f: any) => ({ ...f, [k]: v }));
-
-  const loadSections = async (classId: number) => {
-    const r = await fetch(`/api/classes/${classId}/sections`, { credentials: "include" });
-    if (r.ok) setSections(await r.json());
-  };
 
   const mutation = useMutation({
     mutationFn: async (data: any) => {
@@ -71,7 +89,7 @@ function AddStudentForm({ onClose }: { onClose: () => void }) {
         <SectionTitle>Basic Information</SectionTitle>
         <div className="space-y-1.5"><Label className="text-xs">Admission No *</Label><Input value={form.admissionNo} onChange={e => set("admissionNo", e.target.value)} className="rounded-xl h-9" /></div>
         <div className="space-y-1.5"><Label className="text-xs">Full Name *</Label><Input value={form.name} onChange={e => set("name", e.target.value)} className="rounded-xl h-9" /></div>
-        <div className="space-y-1.5"><Label className="text-xs">Roll No.</Label><Input value={form.rollNo} onChange={e => set("rollNo", e.target.value)} className="rounded-xl h-9" /></div>
+        <div className="space-y-1.5"><Label className="text-xs">Roll No.</Label><Input value={form.rollNo} onChange={e => { rollNoManuallyEdited.current = true; set("rollNo", e.target.value); }} disabled={fetchingRollNo && !rollNoManuallyEdited.current} placeholder={fetchingRollNo ? "Generating..." : "Auto"} className="rounded-xl h-9" /></div>
         <div className="space-y-1.5">
           <Label className="text-xs">Gender</Label>
           <Select value={form.gender || "_"} onValueChange={v => set("gender", v === "_" ? "" : v)}>
@@ -87,14 +105,14 @@ function AddStudentForm({ onClose }: { onClose: () => void }) {
         <SectionTitle>Academic Details</SectionTitle>
         <div className="space-y-1.5">
           <Label className="text-xs">Class *</Label>
-          <Select value={form.classId || "_"} onValueChange={v => { set("classId", v === "_" ? "" : v); if (v !== "_") loadSections(Number(v)); }}>
+          <Select value={form.classId || "_"} onValueChange={v => { set("classId", v === "_" ? "" : v); set("sectionId", ""); rollNoManuallyEdited.current = false; }}>
             <SelectTrigger className="rounded-xl h-9"><SelectValue placeholder="Select Class" /></SelectTrigger>
             <SelectContent><SelectItem value="_">Select Class</SelectItem>{classes.map((c: any) => <SelectItem key={c.id} value={String(c.id)}>{c.name}</SelectItem>)}</SelectContent>
           </Select>
         </div>
         <div className="space-y-1.5">
           <Label className="text-xs">Section</Label>
-          <Select value={form.sectionId || "_"} onValueChange={v => set("sectionId", v === "_" ? "" : v)}>
+          <Select value={form.sectionId || "_"} onValueChange={v => { set("sectionId", v === "_" ? "" : v); rollNoManuallyEdited.current = false; }}>
             <SelectTrigger className="rounded-xl h-9"><SelectValue placeholder="Select Section" /></SelectTrigger>
             <SelectContent><SelectItem value="_">Select Section</SelectItem>{sections.map((s: any) => <SelectItem key={s.id} value={String(s.id)}>{s.name}</SelectItem>)}</SelectContent>
           </Select>

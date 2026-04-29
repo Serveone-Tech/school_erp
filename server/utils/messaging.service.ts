@@ -4,6 +4,7 @@ import { db } from "../db";
 import { emailConfigs } from "@shared/schema";
 import { eq } from "drizzle-orm";
 import { decrypt } from "./crypto";
+import { storage } from "../storage";
 
 
 // ── Email via Gmail SMTP (.env credentials) ───────────────────────────────────
@@ -68,18 +69,22 @@ export async function sendEmailWithAdminConfig(
     const emailPass = decrypt(cfg.emailPass);
     const fromName  = cfg.emailFromName || "School ERP";
 
+    // Use the admin's organization name for the email heading (falls back to fromName)
+    const org = await storage.getOrganization(adminId);
+    const orgName = org?.name || fromName;
+
     const transporter = nodemailer.createTransport({
       service: "gmail",
       auth: { user: emailUser, pass: emailPass },
     });
 
     await transporter.sendMail({
-      from: `${fromName} <${emailUser}>`,
+      from: `${orgName} <${emailUser}>`,
       to,
       subject,
       text,
       html: `<div style="font-family:sans-serif;max-width:600px;margin:auto">
-        <h2 style="color:#1d4ed8">${fromName}</h2>
+        <h2 style="color:#1d4ed8">${orgName}</h2>
         <p>${text.replace(/\n/g, "<br>")}</p>
         <hr><p style="color:#888;font-size:12px">This is an automated message. Please do not reply.</p>
       </div>`,
@@ -207,7 +212,7 @@ export async function sendMessage({
     case "Email":
       return sendEmail({
         to,
-        subject: subject || "Message from ZALGO INFOTECH",
+        subject: subject || "Message from School",
         text: content,
       });
     case "WhatsApp":

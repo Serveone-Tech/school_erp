@@ -32,10 +32,12 @@ export async function provisionParentAccount(student: Student, adminId: number):
     });
 
     const loginUrl = `${process.env.APP_URL || "http://localhost:5000"}/parent/login`;
+    const org = await storage.getOrganization(adminId);
+    const schoolName = org?.name || "School";
 
     await sendEmailWithAdminConfig(adminId, {
       to: email,
-      subject: "Parent Portal Access — School ERP",
+      subject: `Parent Portal Access — ${schoolName}`,
       text: `Dear ${student.fatherName || "Parent"},
 
 Your child ${student.name} has been enrolled. You can now access the Parent Portal to track attendance, fees, exam results, and more.

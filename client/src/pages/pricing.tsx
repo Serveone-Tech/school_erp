@@ -14,6 +14,7 @@ import {
   Lock,
 } from "lucide-react";
 import { useAuth } from "@/contexts/auth";
+import { useCurrency, useExchangeRate } from "@/contexts/currency";
 
 function loadRazorpay(): Promise<boolean> {
   return new Promise((resolve) => {
@@ -58,6 +59,9 @@ export default function PricingPage() {
   const [processingPlanId, setProcessingPlanId] = useState<number | null>(null);
   const { toast } = useToast();
   const { user } = useAuth();
+  const currency = useCurrency();
+  // Plan prices are stored in INR — convert to the admin's selected currency
+  const { data: exchangeRate = 1 } = useExchangeRate("INR", currency.code);
 
   const activePlans = (plans as any[]).filter((p: any) => p.isActive);
   const usedFreeTrial = subStatus?.usedFreeTrial === true;
@@ -215,8 +219,9 @@ export default function PricingPage() {
 
   const getPlanPrice = (plan: any) => {
     if (plan.monthlyPrice === 0 && plan.yearlyPrice === 0) return "Free";
-    const price = billingCycle === "yearly" ? plan.yearlyPrice : plan.monthlyPrice;
-    return `₹${price.toLocaleString("en-IN")}`;
+    const priceInr = billingCycle === "yearly" ? plan.yearlyPrice : plan.monthlyPrice;
+    const converted = Math.round(priceInr * exchangeRate);
+    return currency.format(converted);
   };
 
   const getSavings = (plan: any) => {
@@ -331,6 +336,9 @@ export default function PricingPage() {
                       <span className="text-4xl font-bold text-foreground">{getPlanPrice(plan)}</span>
                       {!isFree && <span className="text-muted-foreground text-sm">/{billingCycle === "yearly" ? "year" : "month"}</span>}
                     </div>
+                    {!isFree && currency.code !== "INR" && (
+                      <p className="text-xs text-muted-foreground mt-0.5">≈ approx. converted from ₹{billingCycle === "yearly" ? plan.yearlyPrice?.toLocaleString("en-IN") : plan.monthlyPrice?.toLocaleString("en-IN")}</p>
+                    )}
                     {isFree && plan.validityDays && (
                       <p className="text-xs text-muted-foreground mt-1">Valid for {plan.validityDays} days</p>
                     )}
@@ -340,9 +348,9 @@ export default function PricingPage() {
                   </div>
 
                   <div className="grid grid-cols-3 gap-2 py-3 border-y border-border/50">
-                    <div className="text-center"><p className="font-bold text-foreground text-sm">{plan.maxStudents || "∞"}</p><p className="text-xs text-muted-foreground">Students</p></div>
-                    <div className="text-center"><p className="font-bold text-foreground text-sm">{plan.maxTeachers || "∞"}</p><p className="text-xs text-muted-foreground">Teachers</p></div>
-                    <div className="text-center"><p className="font-bold text-foreground text-sm">{plan.maxBranches || "∞"}</p><p className="text-xs text-muted-foreground">Branches</p></div>
+                    <div className="text-center"><p className="font-bold text-foreground text-sm">{plan.maxStudents > 0 ? plan.maxStudents : "∞"}</p><p className="text-xs text-muted-foreground">Students</p></div>
+                    <div className="text-center"><p className="font-bold text-foreground text-sm">{plan.maxStaff > 0 ? plan.maxStaff : "∞"}</p><p className="text-xs text-muted-foreground">Teachers</p></div>
+                    <div className="text-center"><p className="font-bold text-foreground text-sm">{plan.maxBranches > 0 ? plan.maxBranches : "∞"}</p><p className="text-xs text-muted-foreground">Branches</p></div>
                   </div>
 
                   <div className="flex-1 space-y-2">

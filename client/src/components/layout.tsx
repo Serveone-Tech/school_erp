@@ -99,6 +99,7 @@ const navigation = [
       { name: "Users & Roles", href: "/users", icon: ShieldCheck, adminOnly: true },
       { name: "Subscription Plans", href: "/pricing", icon: CreditCard, adminOnly: true },
       { name: "Organization", href: "/organization", icon: Building2, adminOnly: true },
+      { name: "Settings", href: "/settings", icon: Settings, adminOnly: true },
     ],
   },
 ];

@@ -47,6 +47,7 @@ import GalleryPage from "@/pages/gallery";
 import CommunicationsPage from "@/pages/communications";
 import AdmissionsPage from "@/pages/admissions";
 import BackupsPage from "@/pages/backups";
+import SettingsPage from "@/pages/settings";
 
 // Parent Portal pages
 import ParentLoginPage from "@/pages/parent/parent-login";
@@ -122,8 +123,9 @@ function AuthenticatedRouter() {
     );
   }
 
-  // Sub-users (staff/teacher/accountant) skip both gates — their admin handles these
-  const isSubUser = user.role !== "admin";
+  // Sub-users skip both onboarding and subscription gates.
+  // This includes staff/teacher/accountant AND any admin-role user created by another admin (adminId set).
+  const isSubUser = user.role !== "admin" || user.adminId !== null;
 
   // Gate 1: Onboarding — only primary admin needs to complete this
   if (!isSubUser && !user.isOnboarded) {
@@ -172,6 +174,7 @@ function AuthenticatedRouter() {
           <Route path="/communications">{() => <ProtectedRoute component={CommunicationsPage} />}</Route>
           <Route path="/admissions">{() => <ProtectedRoute component={AdmissionsPage} />}</Route>
           <Route path="/backups">{() => <ProtectedRoute component={BackupsPage} adminOnly />}</Route>
+          <Route path="/settings">{() => <ProtectedRoute component={SettingsPage} adminOnly />}</Route>
           <Route component={NotFoundPage} />
         </Switch>
       </AppLayout>

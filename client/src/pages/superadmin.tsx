@@ -92,7 +92,7 @@ const emptyPlan = {
   features: "",
   maxStudents: 50,
   maxBranches: 1,
-  maxTeachers: 5,
+  maxStaff: 5,
   isActive: true,
   isFeatured: false,
   sortOrder: 0,
@@ -203,7 +203,7 @@ export default function SuperAdminDashboard() {
       validityDays: form.validityDays ? Number(form.validityDays) : null,
       maxStudents: Number(form.maxStudents),
       maxBranches: Number(form.maxBranches),
-      maxTeachers: Number(form.maxTeachers),
+      maxStaff: Number(form.maxStaff),
       sortOrder: Number(form.sortOrder),
       features:
         typeof form.features === "string"
@@ -369,7 +369,7 @@ export default function SuperAdminDashboard() {
                     </TableCell>
                     <TableCell className="text-xs text-muted-foreground">
                       <div>{plan.maxStudents} students</div>
-                      <div>{plan.maxTeachers} teachers</div>
+                      <div>{plan.maxStaff} teachers</div>
                       <div>{plan.maxBranches} branches</div>
                     </TableCell>
                     <TableCell>
@@ -785,8 +785,8 @@ export default function SuperAdminDashboard() {
                 <Label className="text-xs">Max Teachers</Label>
                 <Input
                   type="number"
-                  value={form.maxTeachers}
-                  onChange={set("maxTeachers")}
+                  value={form.maxStaff}
+                  onChange={set("maxStaff")}
                   className="rounded-lg"
                 />
               </div>

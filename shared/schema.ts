@@ -52,6 +52,7 @@ export const organizations = pgTable("organizations", {
   boardAffiliation: text("board_affiliation"), // CBSE | ICSE | State Board
   principalName: text("principal_name"),
   establishedYear: text("established_year"),
+  currency: text("currency").default("USD"),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });

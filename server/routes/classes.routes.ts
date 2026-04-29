@@ -38,6 +38,15 @@ router.delete("/:id", requireAuth, requireAdmin, async (req, res) => {
   } catch (err: any) { res.status(400).json({ message: err.message }); }
 });
 
+// All sections for admin (for bulk loading counts and expand-row data)
+router.get("/all-sections", requireAuth, async (req, res) => {
+  try {
+    const adminId = getAdminId(req);
+    const data = await storage.getSections({ adminId });
+    res.json(data);
+  } catch (err: any) { res.status(500).json({ message: err.message }); }
+});
+
 // Sections per class
 router.get("/:id/sections", requireAuth, async (req, res) => {
   try {

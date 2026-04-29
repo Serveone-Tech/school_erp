@@ -43,11 +43,11 @@ export default function StudentViewPage() {
     },
   });
   const { data: classes = [] } = useQuery({ queryKey: ["/api/classes"], queryFn: () => apiFetch("/api/classes") });
-  const [sections, setSections] = useState<any[]>([]);
-  const loadSections = async (classId: number) => {
-    const r = await fetch(`/api/classes/${classId}/sections`, { credentials: "include" });
-    if (r.ok) setSections(await r.json());
-  };
+  const { data: sections = [] } = useQuery({
+    queryKey: ["/api/classes/sections", form.classId],
+    enabled: !!form.classId,
+    queryFn: () => apiFetch(`/api/classes/${form.classId}/sections`),
+  });
   const { data: payments = [] } = useQuery({ queryKey: ["/api/fees/payments", id], queryFn: () => apiFetch(`/api/fees/payments?studentId=${id}`) });
   const { data: healthRecords = [] } = useQuery({ queryKey: ["/api/health", id], queryFn: () => apiFetch(`/api/health?studentId=${id}`) });
 
@@ -114,7 +114,6 @@ export default function StudentViewPage() {
                 {editing ? (
                   <>
                     <div className="space-y-1.5"><Label className="text-xs">Name</Label><Input value={form.name || ""} onChange={e => set("name", e.target.value)} className="rounded-xl h-8 text-xs" /></div>
-                    <div className="space-y-1.5"><Label className="text-xs">Roll No</Label><Input value={form.rollNo || ""} onChange={e => set("rollNo", e.target.value)} className="rounded-xl h-8 text-xs" /></div>
                     <div className="space-y-1.5"><Label className="text-xs">Gender</Label>
                       <Select value={form.gender || "_"} onValueChange={v => set("gender", v === "_" ? "" : v)}>
                         <SelectTrigger className="rounded-xl h-8 text-xs"><SelectValue /></SelectTrigger>
@@ -146,7 +145,6 @@ export default function StudentViewPage() {
                     <InfoRow label="Category" value={student.category} />
                     <InfoRow label="Religion" value={student.religion} />
                     <InfoRow label="Nationality" value={student.nationality} />
-                    <InfoRow label="Roll No." value={student.rollNo} />
                   </>
                 )}
               </CardContent>
@@ -185,7 +183,7 @@ export default function StudentViewPage() {
                 {editing ? (
                   <>
                     <div className="space-y-1.5"><Label className="text-xs">Class</Label>
-                      <Select value={form.classId ? String(form.classId) : "_"} onValueChange={v => { set("classId", v === "_" ? null : Number(v)); if (v !== "_") loadSections(Number(v)); }}>
+                      <Select value={form.classId ? String(form.classId) : "_"} onValueChange={v => { set("classId", v === "_" ? null : Number(v)); set("sectionId", null); }}>
                         <SelectTrigger className="rounded-xl h-8 text-xs"><SelectValue placeholder="Select Class" /></SelectTrigger>
                         <SelectContent><SelectItem value="_">No Class</SelectItem>{classes.map((c: any) => <SelectItem key={c.id} value={String(c.id)}>{c.name}</SelectItem>)}</SelectContent>
                       </Select>

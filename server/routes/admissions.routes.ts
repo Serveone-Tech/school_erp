@@ -1,8 +1,8 @@
 import { Router } from "express";
 import { requireAuth } from "../controllers/auth.controller";
 import { db } from "../db";
-import { admissions, students } from "@shared/schema";
-import { eq, and } from "drizzle-orm";
+import { admissions, students, classes } from "@shared/schema";
+import { eq, and, ilike } from "drizzle-orm";
 import { provisionParentAccount } from "../utils/parent-provisioning";
 
 const router = Router();
@@ -61,6 +61,24 @@ router.post("/:id/admit", requireAuth, async (req, res) => {
     const existing = await db.select().from(students).where(eq(students.adminId, adminId));
     const admissionNo = `ADM-${String(existing.length + 1).padStart(4, "0")}`;
 
+    // Try to match classApplied text to a real class for auto roll-no generation
+    let matchedClassId: number | null = null;
+    let rollNo: string | undefined = undefined;
+    if (admission.classApplied) {
+      const [matchedClass] = await db.select().from(classes)
+        .where(and(eq(classes.adminId, adminId), ilike(classes.name, admission.classApplied)));
+      if (matchedClass) {
+        matchedClassId = matchedClass.id;
+        const classStudents = await db.select({ rollNo: students.rollNo }).from(students)
+          .where(and(eq(students.adminId, adminId), eq(students.classId, matchedClassId)));
+        const nums = classStudents
+          .map(s => s.rollNo)
+          .filter(r => r && /^\d+$/.test(String(r)))
+          .map(Number);
+        rollNo = String(nums.length > 0 ? Math.max(...nums) + 1 : 1);
+      }
+    }
+
     const [student] = await db.insert(students).values({
       admissionNo,
       name: admission.applicantName,
@@ -73,7 +91,8 @@ router.post("/:id/admit", requireAuth, async (req, res) => {
       motherName: admission.motherName ?? undefined,
       fatherPhone: admission.fatherPhone ?? undefined,
       fatherEmail: (admission as any).fatherEmail ?? undefined,
-      classId: null,
+      classId: matchedClassId,
+      rollNo,
       admissionDate: admission.admissionDate ? admission.admissionDate.toISOString().split("T")[0] : new Date().toISOString().split("T")[0],
       adminId,
       branchId: admission.branchId ?? undefined,

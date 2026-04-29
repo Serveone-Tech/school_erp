@@ -31,6 +31,7 @@ import galleryRouter from "./routes/gallery.routes";
 import communicationsRouter from "./routes/communications.routes";
 import admissionsRouter from "./routes/admissions.routes";
 import parentRouter from "./routes/parent.routes";
+import settingsRouter from "./routes/settings.routes";
 import { Router } from "express";
 import { requireAuth, requireAdmin } from "./controllers/auth.controller";
 import bcrypt from "bcrypt";
@@ -65,6 +66,7 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
   app.use("/api/communications", communicationsRouter);
   app.use("/api/admissions", admissionsRouter);
   app.use("/api/parent", parentRouter);
+  app.use("/api/settings", settingsRouter);
 
   await seedDatabase().catch(console.error);
   return httpServer;
