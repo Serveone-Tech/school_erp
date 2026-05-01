@@ -46,6 +46,7 @@ import {
   Unlock,
   RefreshCw,
 } from "lucide-react";
+import { PasswordInput } from "@/components/ui/password-input";
 import { useAuth } from "@/contexts/auth";
 import {
   MODULES,
@@ -80,9 +81,9 @@ const ROLE_COLORS: Record<string, string> = {
   teacher: "bg-purple-100 text-purple-700",
 };
 
-const emptyMatrix = () => {
+const emptyMatrix = (mods: readonly { key: string }[] = MODULES) => {
   const m: Record<string, Record<PermAction, boolean>> = {};
-  for (const mod of MODULES)
+  for (const mod of mods)
     m[mod.key] = { read: false, write: false, delete: false };
   return m;
 };
@@ -98,8 +99,11 @@ const emptyForm = {
 
 export default function UsersPage() {
   const { toast } = useToast();
-  const { user: currentUser } = useAuth();
+  const { user: currentUser, planAllows } = useAuth();
   const { confirm, ConfirmDialog } = useConfirm();
+
+  // Only show modules that the admin's active plan includes
+  const visibleModules = MODULES.filter(m => planAllows(m.key));
   const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState<SystemUser | null>(null);
   const [form, setForm] = useState(emptyForm);
@@ -175,7 +179,7 @@ export default function UsersPage() {
   const openCreate = () => {
     setEditing(null);
     setForm(emptyForm);
-    setPermMatrix(emptyMatrix());
+    setPermMatrix(emptyMatrix(visibleModules));
     setOpen(true);
   };
 
@@ -221,7 +225,7 @@ export default function UsersPage() {
   const toggleAll = (action: PermAction, value: boolean) => {
     setPermMatrix((prev) => {
       const next = { ...prev };
-      for (const mod of MODULES) {
+      for (const mod of visibleModules) {
         next[mod.key] = { ...next[mod.key], [action]: value };
         if ((action === "write" || action === "delete") && value)
           next[mod.key].read = true;
@@ -254,9 +258,9 @@ export default function UsersPage() {
   };
 
   const isAdmin = form.role === "admin";
-  const allRead = MODULES.every((m) => permMatrix[m.key]?.read);
-  const allWrite = MODULES.every((m) => permMatrix[m.key]?.write);
-  const allDelete = MODULES.every((m) => permMatrix[m.key]?.delete);
+  const allRead = visibleModules.every((m) => permMatrix[m.key]?.read);
+  const allWrite = visibleModules.every((m) => permMatrix[m.key]?.write);
+  const allDelete = visibleModules.every((m) => permMatrix[m.key]?.delete);
 
   return (
     <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
@@ -445,9 +449,8 @@ export default function UsersPage() {
                     ? "New Password (leave blank to keep)"
                     : "Password *"}
                 </Label>
-                <Input
+                <PasswordInput
                   data-testid="input-user-password"
-                  type="password"
                   value={form.password}
                   onChange={(e) =>
                     setForm((f) => ({ ...f, password: e.target.value }))
@@ -567,7 +570,7 @@ export default function UsersPage() {
                     </tr>
                   </thead>
                   <tbody>
-                    {MODULES.map((mod, idx) => (
+                    {visibleModules.map((mod, idx) => (
                       <tr
                         key={mod.key}
                         className={`border-b last:border-0 ${idx % 2 === 0 ? "" : "bg-muted/20"}`}

@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { PasswordInput } from "@/components/ui/password-input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2, KeyRound, ShieldCheck } from "lucide-react";
@@ -55,15 +56,15 @@ export function ParentChangePasswordDialog({ open, onOpenChange }: ChangePasswor
         <form onSubmit={handleSubmit} className="space-y-4 mt-2">
           <div className="space-y-1.5">
             <Label htmlFor="cp-current">Current Password</Label>
-            <Input id="cp-current" type="password" value={current} onChange={e => setCurrent(e.target.value)} required placeholder="••••••••" />
+            <PasswordInput id="cp-current" value={current} onChange={e => setCurrent(e.target.value)} required placeholder="••••••••" />
           </div>
           <div className="space-y-1.5">
             <Label htmlFor="cp-new">New Password</Label>
-            <Input id="cp-new" type="password" value={next} onChange={e => setNext(e.target.value)} required placeholder="••••••••" minLength={6} />
+            <PasswordInput id="cp-new" value={next} onChange={e => setNext(e.target.value)} required placeholder="••••••••" minLength={6} />
           </div>
           <div className="space-y-1.5">
             <Label htmlFor="cp-confirm">Confirm New Password</Label>
-            <Input id="cp-confirm" type="password" value={confirm} onChange={e => setConfirm(e.target.value)} required placeholder="••••••••" />
+            <PasswordInput id="cp-confirm" value={confirm} onChange={e => setConfirm(e.target.value)} required placeholder="••••••••" />
           </div>
           <Button type="submit" className="w-full" disabled={loading}>
             {loading && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
@@ -197,11 +198,11 @@ export function ParentForgotPasswordDialog({ open, onOpenChange }: ForgotPasswor
             <DialogDescription>Choose your new password.</DialogDescription>
             <div className="space-y-1.5">
               <Label htmlFor="fp-new">New Password</Label>
-              <Input id="fp-new" type="password" value={newPassword} onChange={e => setNewPassword(e.target.value)} required minLength={6} placeholder="••••••••" />
+              <PasswordInput id="fp-new" value={newPassword} onChange={e => setNewPassword(e.target.value)} required minLength={6} placeholder="••••••••" />
             </div>
             <div className="space-y-1.5">
               <Label htmlFor="fp-confirm">Confirm Password</Label>
-              <Input id="fp-confirm" type="password" value={confirmPassword} onChange={e => setConfirmPassword(e.target.value)} required placeholder="••••••••" />
+              <PasswordInput id="fp-confirm" value={confirmPassword} onChange={e => setConfirmPassword(e.target.value)} required placeholder="••••••••" />
             </div>
             <Button type="submit" className="w-full" disabled={loading}>
               {loading && <Loader2 className="w-4 h-4 mr-2 animate-spin" />} Reset Password

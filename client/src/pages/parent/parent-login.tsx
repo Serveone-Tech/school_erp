@@ -3,6 +3,7 @@ import { useParentAuth } from "@/contexts/parent-auth";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { PasswordInput } from "@/components/ui/password-input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Loader2, Users } from "lucide-react";
@@ -65,14 +66,14 @@ export default function ParentLoginPage() {
               </div>
               <div className="space-y-1.5">
                 <Label htmlFor="password" className="text-white/80">Password</Label>
-                <Input
+                <PasswordInput
                   id="password"
-                  type="password"
                   value={password}
                   onChange={e => setPassword(e.target.value)}
                   required
                   placeholder="••••••••"
                   className="bg-white/10 border-white/20 text-white placeholder:text-white/30 focus:border-primary"
+                  buttonClassName="text-white/60 hover:text-white"
                 />
               </div>
               <Button type="submit" className="w-full" disabled={loading}>

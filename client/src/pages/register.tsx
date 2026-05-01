@@ -3,6 +3,7 @@ import { useLocation } from "wouter";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { PasswordInput } from "@/components/ui/password-input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Loader2, GraduationCap } from "lucide-react";
@@ -75,13 +76,15 @@ export default function RegisterPage() {
               </div>
               <div className="space-y-1.5">
                 <Label htmlFor="password" className="text-white/70 text-sm">Password</Label>
-                <Input id="password" type="password" value={form.password} onChange={set("password")} placeholder="Min 6 characters" required
-                  className="bg-white/10 border-white/20 text-white placeholder:text-white/30 focus:border-primary" />
+                <PasswordInput id="password" value={form.password} onChange={set("password")} placeholder="Min 6 characters" required
+                  className="bg-white/10 border-white/20 text-white placeholder:text-white/30 focus:border-primary"
+                  buttonClassName="text-white/60 hover:text-white" />
               </div>
               <div className="space-y-1.5">
                 <Label htmlFor="confirm" className="text-white/70 text-sm">Confirm Password</Label>
-                <Input id="confirm" type="password" value={form.confirm} onChange={set("confirm")} placeholder="Repeat password" required
-                  className="bg-white/10 border-white/20 text-white placeholder:text-white/30 focus:border-primary" />
+                <PasswordInput id="confirm" value={form.confirm} onChange={set("confirm")} placeholder="Repeat password" required
+                  className="bg-white/10 border-white/20 text-white placeholder:text-white/30 focus:border-primary"
+                  buttonClassName="text-white/60 hover:text-white" />
               </div>
               <Button type="submit" disabled={loading} className="w-full bg-primary hover:bg-primary/90 text-white font-semibold mt-2">
                 {loading ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}

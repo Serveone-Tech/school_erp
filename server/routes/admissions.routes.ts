@@ -2,8 +2,9 @@ import { Router } from "express";
 import { requireAuth } from "../controllers/auth.controller";
 import { db } from "../db";
 import { admissions, students, classes } from "@shared/schema";
-import { eq, and, ilike } from "drizzle-orm";
+import { eq, and, ilike, count } from "drizzle-orm";
 import { provisionParentAccount } from "../utils/parent-provisioning";
+import { getPlanLimits } from "../middleware/subscription.middleware";
 
 const router = Router();
 function getAdminId(req: any) { const s = req.session as any; return s.adminId ?? s.userId; }
@@ -56,6 +57,15 @@ router.post("/:id/admit", requireAuth, async (req, res) => {
     const admission = await db.select().from(admissions).where(eq(admissions.id, Number(req.params.id))).then(r => r[0]);
     if (!admission) return res.status(404).json({ message: "Admission not found" });
     if (admission.studentId) return res.status(400).json({ message: "Already admitted", studentId: admission.studentId });
+
+    // Plan: max students check
+    const plan = await getPlanLimits(adminId);
+    if (plan && plan.maxStudents > 0) {
+      const [{ total }] = await db.select({ total: count() }).from(students).where(eq(students.adminId, adminId));
+      if (total >= plan.maxStudents) {
+        return res.status(402).json({ message: `Student limit reached (${plan.maxStudents}). Please upgrade your plan.` });
+      }
+    }
 
     // Auto-generate admission number
     const existing = await db.select().from(students).where(eq(students.adminId, adminId));

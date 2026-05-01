@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { PasswordInput } from "@/components/ui/password-input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2, KeyRound, ShieldCheck, MessageSquare } from "lucide-react";
@@ -60,9 +61,8 @@ export function ChangePasswordDialog({ open, onOpenChange }: ChangePasswordProps
         <form onSubmit={handleSubmit} className="space-y-4 mt-2">
           <div className="space-y-1.5">
             <Label htmlFor="cp-current">Current Password</Label>
-            <Input
+            <PasswordInput
               id="cp-current"
-              type="password"
               data-testid="input-current-password"
               value={current}
               onChange={e => setCurrent(e.target.value)}
@@ -72,9 +72,8 @@ export function ChangePasswordDialog({ open, onOpenChange }: ChangePasswordProps
           </div>
           <div className="space-y-1.5">
             <Label htmlFor="cp-new">New Password</Label>
-            <Input
+            <PasswordInput
               id="cp-new"
-              type="password"
               data-testid="input-new-password"
               value={next}
               onChange={e => setNext(e.target.value)}
@@ -85,9 +84,8 @@ export function ChangePasswordDialog({ open, onOpenChange }: ChangePasswordProps
           </div>
           <div className="space-y-1.5">
             <Label htmlFor="cp-confirm">Confirm New Password</Label>
-            <Input
+            <PasswordInput
               id="cp-confirm"
-              type="password"
               data-testid="input-confirm-password"
               value={confirm}
               onChange={e => setConfirm(e.target.value)}
@@ -140,7 +138,7 @@ export function ForgotPasswordDialog({ open, onOpenChange }: ForgotPasswordProps
       if (!res.ok) throw new Error(data.message);
       toast({
         title: "OTP Sent",
-        description: "A 6-digit OTP has been sent (check server console in dev mode).",
+        description: `A 6-digit OTP has been sent to ${email}. Please check your inbox.`,
       });
       setStep("otp");
     } catch (err: any) {
@@ -282,9 +280,8 @@ export function ForgotPasswordDialog({ open, onOpenChange }: ForgotPasswordProps
           <form onSubmit={resetPassword} className="space-y-4">
             <div className="space-y-1.5">
               <Label htmlFor="fp-newpass">New Password</Label>
-              <Input
+              <PasswordInput
                 id="fp-newpass"
-                type="password"
                 data-testid="input-reset-new-password"
                 value={newPass}
                 onChange={e => setNewPass(e.target.value)}
@@ -295,9 +292,8 @@ export function ForgotPasswordDialog({ open, onOpenChange }: ForgotPasswordProps
             </div>
             <div className="space-y-1.5">
               <Label htmlFor="fp-confirm">Confirm Password</Label>
-              <Input
+              <PasswordInput
                 id="fp-confirm"
-                type="password"
                 data-testid="input-reset-confirm-password"
                 value={confirmPass}
                 onChange={e => setConfirmPass(e.target.value)}

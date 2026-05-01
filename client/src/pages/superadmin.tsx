@@ -35,6 +35,7 @@ import {
 } from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { format } from "date-fns";
+import { MODULES } from "@/lib/permissions";
 
 function usePlans() {
   return useQuery({
@@ -93,10 +94,15 @@ const emptyPlan = {
   maxStudents: 50,
   maxBranches: 1,
   maxStaff: 5,
+  maxUsers: 5,
+  allowedModules: [] as string[],
   isActive: true,
   isFeatured: false,
   sortOrder: 0,
 };
+
+// Single source of truth — same list used in permissions.ts and layout.tsx
+const ALL_MODULES = MODULES;
 
 export default function SuperAdminDashboard() {
   const { data: plans = [], isLoading: plansLoading } = usePlans();
@@ -204,6 +210,8 @@ export default function SuperAdminDashboard() {
       maxStudents: Number(form.maxStudents),
       maxBranches: Number(form.maxBranches),
       maxStaff: Number(form.maxStaff),
+      maxUsers: Number(form.maxUsers),
+      allowedModules: form.allowedModules,
       sortOrder: Number(form.sortOrder),
       features:
         typeof form.features === "string"
@@ -225,6 +233,8 @@ export default function SuperAdminDashboard() {
         ? plan.features.join("\n")
         : plan.features || "",
       validityDays: plan.validityDays || "",
+      maxUsers: plan.maxUsers ?? 5,
+      allowedModules: plan.allowedModules ?? [],
     });
     setPlanModal(true);
   };
@@ -799,7 +809,48 @@ export default function SuperAdminDashboard() {
                   className="rounded-lg"
                 />
               </div>
+              <div className="space-y-1">
+                <Label className="text-xs">Max Users</Label>
+                <Input
+                  type="number"
+                  value={form.maxUsers}
+                  onChange={set("maxUsers")}
+                  className="rounded-lg"
+                />
+              </div>
             </div>
+
+            {/* Allowed Modules */}
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <Label className="text-xs">Allowed Modules <span className="text-muted-foreground font-normal">(leave all unchecked = all modules allowed)</span></Label>
+                <button type="button" className="text-xs text-primary underline" onClick={() => setForm((f: any) => ({ ...f, allowedModules: f.allowedModules.length === ALL_MODULES.length ? [] : ALL_MODULES.map(m => m.key) }))}>
+                  {(form.allowedModules as string[]).length === ALL_MODULES.length ? "Deselect All" : "Select All"}
+                </button>
+              </div>
+              <div className="grid grid-cols-2 gap-1.5 border rounded-lg p-3 bg-muted/30">
+                {ALL_MODULES.map(mod => (
+                  <label key={mod.key} className="flex items-center gap-2 text-xs cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={(form.allowedModules as string[]).includes(mod.key)}
+                      onChange={e => {
+                        const mods = form.allowedModules as string[];
+                        setForm((f: any) => ({
+                          ...f,
+                          allowedModules: e.target.checked
+                            ? [...mods, mod.key]
+                            : mods.filter((m: string) => m !== mod.key),
+                        }));
+                      }}
+                      className="rounded"
+                    />
+                    {mod.label}
+                  </label>
+                ))}
+              </div>
+            </div>
+
             <div className="space-y-1">
               <Label className="text-xs">Description</Label>
               <Input

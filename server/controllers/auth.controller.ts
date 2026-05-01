@@ -4,6 +4,10 @@ import { storage } from "../storage";
 import { z } from "zod";
 import crypto from "crypto";
 import { sendEmail } from "../utils/messaging.service";
+import { getPlanLimits } from "../middleware/subscription.middleware";
+import { db } from "../db";
+import { users } from "@shared/schema";
+import { eq, count, and, isNotNull } from "drizzle-orm";
 
 const ROLES = ["admin", "staff", "accountant", "teacher"] as const;
 
@@ -67,14 +71,20 @@ export const AuthController = {
       const expiry = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
       otpStore.set(email.toLowerCase(), { otp, expiry });
 
-      await sendEmail({
+      const emailResult = await sendEmail({
         to: email,
         subject: "Password Reset OTP — School ERP",
         text: `Hello ${user.name},\n\nYour password reset OTP is:\n\n${otp}\n\nThis OTP is valid for 10 minutes. Do not share it with anyone.\n\nIf you did not request this, please ignore this email.`,
       });
 
+      if (!emailResult.success) {
+        otpStore.delete(email.toLowerCase());
+        console.error(`[OTP] Failed to send email to ${email}:`, emailResult.error);
+        return res.status(500).json({ message: "Failed to send OTP email. Please contact support." });
+      }
+
       console.log(`[OTP] Sent password reset OTP to ${email}`);
-      res.json({ message: "If this email is registered, an OTP has been sent." });
+      res.json({ message: "OTP sent to your email address." });
     } catch (err) {
       if (err instanceof z.ZodError) return res.status(400).json({ message: err.errors[0].message });
       throw err;
@@ -176,8 +186,18 @@ export const AuthController = {
       if (existing) return res.status(400).json({ message: "Email already in use" });
 
       const passwordHash = await bcrypt.hash(data.password, 10);
-      // Always scope sub-users under the root admin (not a sub-admin)
       const rootAdminId: number = (req.session as any).adminId ?? (req.session as any).userId;
+
+      // Plan: max users check (count sub-users belonging to this admin)
+      const plan = await getPlanLimits(rootAdminId);
+      if (plan && plan.maxUsers > 0) {
+        const [{ total }] = await db.select({ total: count() }).from(users)
+          .where(and(eq(users.adminId, rootAdminId), isNotNull(users.adminId)));
+        if (total >= plan.maxUsers) {
+          return res.status(402).json({ message: `User limit reached (${plan.maxUsers}). Please upgrade your plan.` });
+        }
+      }
+
       const user = await storage.createUser({
         name: data.name,
         email: data.email,

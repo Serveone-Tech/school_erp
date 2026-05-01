@@ -303,7 +303,7 @@ function CollectFeeDialog({ students, structures, classes, branchId, onClose, on
           {/* Student */}
           <div className="space-y-1.5">
             <Label className="text-xs">Student *</Label>
-            <Select value={form.studentId || "_"} onValueChange={v => { set("studentId", v === "_" ? "" : v); set("feeStructureId", ""); set("amount", ""); }}>
+            <Select value={form.studentId || "_"} onValueChange={v => { const sid = v === "_" ? "" : v; const st = students.find((s: any) => String(s.id) === sid); setForm((p: any) => ({ ...p, studentId: sid, feeStructureId: "", amount: "", branchId: st?.branchId ?? p.branchId })); }}>
               <SelectTrigger className="rounded-xl h-9"><SelectValue placeholder="Select Student" /></SelectTrigger>
               <SelectContent className="max-h-52">
                 {students.map((s: any) => {

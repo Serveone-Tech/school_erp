@@ -1,25 +1,29 @@
 export type PermAction = "read" | "write" | "delete";
 
 export const MODULES = [
-  { key: "leads",          label: "Enquiries",          nav: "/leads" },
-  { key: "students",       label: "Students",            nav: "/students" },
-  { key: "teachers",       label: "Teachers",            nav: "/teachers" },
-  { key: "courses",        label: "Courses & Batches",   nav: "/courses" },
-  { key: "fees",           label: "Fees & Payments",     nav: "/fees" },
-  // { key: "assignments",    label: "Assignments",          nav: "/assignments" },
-  // { key: "exams",          label: "Exams",               nav: "/exams" },
-  { key: "inventory",      label: "Inventory",           nav: "/inventory" },
-  { key: "transactions",   label: "Income / Expense",    nav: "/transactions" },
-  { key: "communications", label: "Communications",      nav: "/communications" },
-  { key: "reports",        label: "Reports",             nav: "/reports" },
-  { key: "report-card",       label: "Report Card",            nav: "/report-card" },
+  { key: "students",       label: "Students / Admissions / Remarks / Gallery" },
+  { key: "classes",        label: "Classes, Sections & Timetable" },
+  { key: "staff",          label: "Staff" },
+  { key: "attendance",     label: "Attendance (Student & Staff)" },
+  { key: "homework",       label: "Homework" },
+  { key: "exams",          label: "Examinations" },
+  { key: "notices",        label: "Notice Board" },
+  { key: "fees",           label: "Fee Management" },
+  { key: "transactions",   label: "Income / Expense" },
+  { key: "payroll",        label: "Staff Payroll" },
+  { key: "library",        label: "Library" },
+  { key: "inventory",      label: "Inventory" },
+  { key: "transport",      label: "Transport" },
+  { key: "health",         label: "Health Records" },
+  { key: "visitors",       label: "Visitors" },
+  { key: "communications", label: "Communications & Automation" },
+  { key: "reports",        label: "Reports" },
 ] as const;
 
 export type ModuleKey = typeof MODULES[number]["key"];
 
-/** Check if a permission string (e.g. "leads:write") is in the array */
+/** Check if a permission string (e.g. "students:write") is in the array */
 export function hasPerm(permissions: string[], module: string, action: PermAction): boolean {
-  // Support legacy flat format ("leads") as read-only
   if (permissions.includes(`${module}:${action}`)) return true;
   // Legacy: plain module name = read only
   if (action === "read" && permissions.includes(module)) return true;

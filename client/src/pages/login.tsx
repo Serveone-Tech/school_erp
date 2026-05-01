@@ -3,6 +3,7 @@ import { useAuth } from "@/contexts/auth";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { PasswordInput } from "@/components/ui/password-input";
 import { Label } from "@/components/ui/label";
 import {
   Card,
@@ -94,15 +95,15 @@ export default function LoginPage() {
                     Forgot Password?
                   </button>
                 </div>
-                <Input
+                <PasswordInput
                   id="password"
                   data-testid="input-password"
-                  type="password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder=""
                   required
                   className="bg-white/10 border-white/20 text-white placeholder:text-white/30 focus:border-primary"
+                  buttonClassName="text-white/60 hover:text-white"
                 />
               </div>
               <Button

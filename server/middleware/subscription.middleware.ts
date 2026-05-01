@@ -4,6 +4,18 @@ import { subscriptions, plans } from "@shared/schema";
 import { eq, and, desc, gt } from "drizzle-orm";
 import { differenceInDays } from "date-fns";
 
+// ── Shared helper: get active plan for an admin ───────────────────────────────
+export async function getPlanLimits(adminId: number) {
+  const [sub] = await db
+    .select({ plan: plans })
+    .from(subscriptions)
+    .innerJoin(plans, eq(subscriptions.planId, plans.id))
+    .where(and(eq(subscriptions.userId, adminId), eq(subscriptions.status, "active")))
+    .orderBy(desc(subscriptions.createdAt))
+    .limit(1);
+  return sub?.plan ?? null;
+}
+
 // ── Check subscription validity for every request ─────────────────────────────
 export async function requireSubscription(
   req: Request,

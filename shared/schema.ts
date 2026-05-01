@@ -627,6 +627,7 @@ export const plans = pgTable("plans", {
   maxStudents: integer("max_students").default(200),
   maxBranches: integer("max_branches").default(1),
   maxStaff: integer("max_staff").default(20),
+  maxUsers: integer("max_users").default(5),
   isActive: boolean("is_active").default(true),
   isFeatured: boolean("is_featured").default(false),
   razorpayMonthlyPlanId: text("razorpay_monthly_plan_id"),

@@ -106,7 +106,7 @@ export default function RemarksPage() {
           <div className="space-y-3">
             <div className="space-y-1.5">
               <Label className="text-xs">Student *</Label>
-              <Select value={form.studentId || "_"} onValueChange={v => set("studentId", v === "_" ? "" : v)}>
+              <Select value={form.studentId || "_"} onValueChange={v => { const sid = v === "_" ? "" : v; const st = (students as any[]).find((s: any) => String(s.id) === sid); setForm((p: any) => ({ ...p, studentId: sid, branchId: st?.branchId ?? p.branchId })); }}>
                 <SelectTrigger className="rounded-xl h-9"><SelectValue placeholder="Select Student" /></SelectTrigger>
                 <SelectContent>{students.map((s: any) => <SelectItem key={s.id} value={String(s.id)}>{s.name}</SelectItem>)}</SelectContent>
               </Select>

@@ -118,7 +118,7 @@ function useOrganization() {
 
 function SidebarContent({ onClose }: { onClose?: () => void }) {
   const [location] = useLocation();
-  const { user, logout, canAccess } = useAuth();
+  const { user, logout, canAccess, planAllows } = useAuth();
   const [changePasswordOpen, setChangePasswordOpen] = useState(false);
   const { data: org } = useOrganization();
 
@@ -159,6 +159,8 @@ function SidebarContent({ onClose }: { onClose?: () => void }) {
           const visibleItems = section.items.filter((item: any) => {
             if (item.adminOnly) return isAdmin;
             if (!item.module) return true;
+            // Plan module gate: if plan restricts modules, hide disallowed ones
+            if (isAdmin && !planAllows(item.module)) return false;
             return isAdmin || canAccess(item.module);
           });
           if (visibleItems.length === 0) return null;

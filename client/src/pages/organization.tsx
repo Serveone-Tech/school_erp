@@ -5,6 +5,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { PasswordInput } from "@/components/ui/password-input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -316,7 +317,7 @@ export default function OrganizationPage() {
             </div>
             <div className="col-span-2 space-y-1.5">
               <Label className="text-xs">Gmail App Password *</Label>
-              <Input value={emailForm.emailPass} onChange={e => setE("emailPass", e.target.value)} placeholder={emailStatus?.configured ? "Leave blank to keep existing" : "xxxx xxxx xxxx xxxx"} className="rounded-xl h-9" type="password" />
+              <PasswordInput value={emailForm.emailPass} onChange={e => setE("emailPass", e.target.value)} placeholder={emailStatus?.configured ? "Leave blank to keep existing" : "xxxx xxxx xxxx xxxx"} className="rounded-xl h-9" />
               <p className="text-[11px] text-muted-foreground">
                 Generate from: Google Account → Security → 2-Step Verification → App Passwords
               </p>

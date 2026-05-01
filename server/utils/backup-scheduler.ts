@@ -18,15 +18,4 @@ export function startBackupScheduler() {
       console.error("[Backup Scheduler] ❌ Scheduled backup failed:", err);
     }
   });
-
-  // ── Startup backup — server start par ek baar turant backup lo ────────────
-  // (optional: comment out karo agar nahi chahiye)
-  setTimeout(async () => {
-    console.log("[Backup Scheduler] 🔄 Running startup backup...");
-    try {
-      await runBackup();
-    } catch (err) {
-      console.error("[Backup Scheduler] ❌ Startup backup failed:", err);
-    }
-  }, 5000); // server fully start hone ka wait
 }
