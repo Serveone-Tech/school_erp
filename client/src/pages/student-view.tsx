@@ -90,6 +90,7 @@ export default function StudentViewPage() {
           <p className="font-bold text-lg">{student.name}</p>
           <div className="flex items-center gap-2 mt-1 flex-wrap">
             {cls && <Badge variant="outline" className="text-xs">{cls.name}</Badge>}
+            {sections.find((s: any) => s.id === student.sectionId) && <Badge variant="outline" className="text-xs">Section {sections.find((s: any) => s.id === student.sectionId)?.name}</Badge>}
             <Badge variant="outline" className={`text-xs ${student.status === "Active" ? "border-emerald-200 text-emerald-700 bg-emerald-50" : ""}`}>{student.status}</Badge>
             {student.rollNo && <span className="text-xs text-muted-foreground">Roll No: {student.rollNo}</span>}
           </div>
@@ -223,7 +224,7 @@ export default function StudentViewPage() {
                 ) : (
                   <>
                     <InfoRow label="Class" value={cls?.name} />
-                    <InfoRow label="Section" value={student.sectionId ? `Section ${student.sectionId}` : undefined} />
+                    <InfoRow label="Section" value={sections.find((s: any) => s.id === student.sectionId)?.name} />
                     <InfoRow label="Roll No." value={student.rollNo} />
                     <InfoRow label="Admission Type" value={student.admissionType} />
                     <InfoRow label="Admission Date" value={student.admissionDate} />

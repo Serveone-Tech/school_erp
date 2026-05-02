@@ -200,6 +200,7 @@ export default function StudentsPage() {
     queryFn: async () => { const r = await fetch(`/api/students${branchQuery}`, { credentials: "include" }); return r.json(); },
   });
   const { data: classes = [] } = useClasses();
+  const { data: allSections = [] } = useQuery({ queryKey: ["/api/classes/all-sections"], queryFn: async () => { const r = await fetch("/api/classes/all-sections", { credentials: "include" }); return r.json(); } });
 
   const deleteMutation = useMutation({
     mutationFn: async (id: number) => { await fetch(`/api/students/${id}`, { method: "DELETE", credentials: "include" }); },
@@ -258,23 +259,26 @@ export default function StudentsPage() {
           <table className="w-full text-sm">
             <thead className="bg-muted/50">
               <tr>
-                {["Admission No", "Name", "Class/Section", "Father's Name", "Phone", "Status", ""].map(h => (
+                {["Admission No", "Name", "Class", "Section", "Roll No", "Father's Name", "Phone", "Status", ""].map(h => (
                   <th key={h} className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground">{h}</th>
                 ))}
               </tr>
             </thead>
             <tbody>
               {isLoading ? (
-                <tr><td colSpan={7} className="text-center py-12 text-muted-foreground">Loading...</td></tr>
+                <tr><td colSpan={9} className="text-center py-12 text-muted-foreground">Loading...</td></tr>
               ) : paginated.length === 0 ? (
-                <tr><td colSpan={7} className="text-center py-12 text-muted-foreground">No students found</td></tr>
+                <tr><td colSpan={9} className="text-center py-12 text-muted-foreground">No students found</td></tr>
               ) : paginated.map((s: any) => {
                 const cls = classes.find((c: any) => c.id === s.classId);
+                const sec = allSections.find((sec: any) => sec.id === s.sectionId);
                 return (
                   <tr key={s.id} className="border-t border-border/40 hover:bg-accent/20 cursor-pointer" onClick={() => navigate(`/students/${s.id}`)}>
                     <td className="px-4 py-3 font-mono text-xs text-muted-foreground">{s.admissionNo}</td>
                     <td className="px-4 py-3 font-medium">{s.name}</td>
                     <td className="px-4 py-3 text-muted-foreground">{cls?.name || "—"}</td>
+                    <td className="px-4 py-3 text-muted-foreground">{sec?.name || "—"}</td>
+                    <td className="px-4 py-3 text-muted-foreground text-center">{s.rollNo || "—"}</td>
                     <td className="px-4 py-3 text-muted-foreground">{s.fatherName || "—"}</td>
                     <td className="px-4 py-3">{s.phone || "—"}</td>
                     <td className="px-4 py-3">
