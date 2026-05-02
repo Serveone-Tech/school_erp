@@ -13,10 +13,12 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Plus, Search, BookMarked, RotateCcw } from "lucide-react";
+import { useCurrency } from "@/contexts/currency";
 import { format } from "date-fns";
 
 
 export default function LibraryPage() {
+  const currency = useCurrency();
   const { toast } = useToast();
   const qc = useQueryClient();
   const [tab, setTab] = useState("books");
@@ -149,7 +151,7 @@ export default function LibraryPage() {
               <div className="space-y-1.5"><Label className="text-xs">Category</Label><Input value={form.category || ""} onChange={e => set("category", e.target.value)} placeholder="Science, Fiction..." className="rounded-xl h-9" /></div>
               <div className="space-y-1.5"><Label className="text-xs">Total Copies *</Label><Input type="number" value={form.totalCopies} onChange={e => set("totalCopies", Number(e.target.value))} className="rounded-xl h-9" min="1" /></div>
               <div className="space-y-1.5"><Label className="text-xs">Rack No.</Label><Input value={form.rackNo || ""} onChange={e => set("rackNo", e.target.value)} className="rounded-xl h-9" /></div>
-              <div className="space-y-1.5"><Label className="text-xs">Price (₹)</Label><Input type="number" value={form.price || ""} onChange={e => set("price", e.target.value)} className="rounded-xl h-9" /></div>
+              <div className="space-y-1.5"><Label className="text-xs">Price ({currency.symbol})</Label><Input type="number" value={form.price || ""} onChange={e => set("price", e.target.value)} className="rounded-xl h-9" /></div>
               <div className="space-y-1.5"><Label className="text-xs">Language</Label><Input value={form.language || "English"} onChange={e => set("language", e.target.value)} className="rounded-xl h-9" /></div>
               <BranchSelectField value={form.branchId} onChange={v => set("branchId", v)} className="col-span-2" />
             </div>

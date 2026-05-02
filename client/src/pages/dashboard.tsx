@@ -4,6 +4,7 @@ import { Users, GraduationCap, CreditCard, Bell, BookOpen, TrendingUp, UserCheck
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { format } from "date-fns";
+import { useCurrency } from "@/contexts/currency";
 
 function StatCard({ title, value, icon: Icon, color, sub }: any) {
   return (
@@ -25,6 +26,7 @@ function StatCard({ title, value, icon: Icon, color, sub }: any) {
 }
 
 export default function DashboardPage() {
+  const currency = useCurrency();
   const { data } = useQuery({
     queryKey: ["/api/dashboard"],
     queryFn: async () => {
@@ -49,7 +51,7 @@ export default function DashboardPage() {
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         <StatCard title="Total Students" value={stats.totalStudents || 0} icon={Users} color="bg-blue-50 text-blue-600" sub="Active students" />
         <StatCard title="Total Staff" value={stats.totalStaff || 0} icon={GraduationCap} color="bg-purple-50 text-purple-600" sub="Teaching + Non-teaching" />
-        <StatCard title="Fee Collected" value={`₹${(stats.totalFeeCollected || 0).toLocaleString("en-IN")}`} icon={CreditCard} color="bg-emerald-50 text-emerald-600" sub="Total this year" />
+        <StatCard title="Fee Collected" value={currency.format(stats.totalFeeCollected || 0)} icon={CreditCard} color="bg-emerald-50 text-emerald-600" sub="Total this year" />
         <StatCard title="Today's Date" value={format(new Date(), "dd MMM")} icon={BookOpen} color="bg-amber-50 text-amber-600" sub={format(new Date(), "EEEE")} />
       </div>
 

@@ -1,7 +1,7 @@
 import type { Request, Response, NextFunction } from "express";
 import { db } from "../db";
 import { subscriptions, plans } from "@shared/schema";
-import { eq, and, desc, gt } from "drizzle-orm";
+import { eq, and, desc, gt, or } from "drizzle-orm";
 import { differenceInDays } from "date-fns";
 
 // ── Shared helper: get active plan for an admin ───────────────────────────────
@@ -76,12 +76,16 @@ export async function requireSubscription(
 
 // ── Get subscription status (for frontend) ────────────────────────────────────
 export async function getSubscriptionStatus(userId: number) {
+  // Query active OR recently-expired subscriptions (covers DB-marked "expired" status)
   const [sub] = await db
     .select({ subscription: subscriptions, plan: plans })
     .from(subscriptions)
     .innerJoin(plans, eq(subscriptions.planId, plans.id))
     .where(
-      and(eq(subscriptions.userId, userId), eq(subscriptions.status, "active")),
+      and(
+        eq(subscriptions.userId, userId),
+        or(eq(subscriptions.status, "active"), eq(subscriptions.status, "expired")),
+      ),
     )
     .orderBy(desc(subscriptions.createdAt))
     .limit(1);
@@ -99,12 +103,14 @@ export async function getSubscriptionStatus(userId: number) {
 
   const now = new Date();
   const endDate = new Date(sub.subscription.endDate);
-  const daysLeft = differenceInDays(endDate, now);
+  const daysLeft = Math.max(0, differenceInDays(endDate, now));
 
-  if (endDate < now) return { status: "expired", daysLeft: 0, plan: sub.plan, usedFreeTrial };
+  if (endDate < now || sub.subscription.status === "expired") {
+    return { status: "expired", daysLeft: 0, plan: sub.plan, endDate: sub.subscription.endDate, usedFreeTrial };
+  }
 
   return {
-    status: daysLeft <= 3 ? "expiring_soon" : "active",
+    status: daysLeft <= 5 ? "expiring_soon" : "active",
     daysLeft,
     plan: sub.plan,
     subscription: sub.subscription,

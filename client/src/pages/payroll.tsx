@@ -13,6 +13,7 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Plus, DollarSign, CalendarDays, TrendingDown, Info } from "lucide-react";
+import { useCurrency } from "@/contexts/currency";
 import { format, getDaysInMonth, parseISO, startOfMonth, endOfMonth } from "date-fns";
 
 const MONTHS = ["2024-04","2024-05","2024-06","2024-07","2024-08","2024-09","2024-10","2024-11","2024-12","2025-01","2025-02","2025-03","2025-04","2025-05","2025-06","2025-07","2025-08","2025-09","2025-10","2025-11","2025-12","2026-01","2026-02","2026-03","2026-04","2026-05","2026-06"];
@@ -45,6 +46,7 @@ function calcLeaveDaysInMonth(leaves: any[], staffId: number, month: string): nu
 }
 
 export default function PayrollPage() {
+  const currency = useCurrency();
   const { toast } = useToast();
   const qc = useQueryClient();
   const { selectedBranchId, branchQuery } = useBranch();
@@ -155,11 +157,11 @@ export default function PayrollPage() {
                     <tr key={p.id} className="border-t border-border/40 hover:bg-accent/20">
                       <td className="px-3 py-2.5 font-medium">{s?.name || "—"}</td>
                       <td className="px-3 py-2.5 text-muted-foreground">{p.month}</td>
-                      <td className="px-3 py-2.5">₹{(p.basicSalary || 0).toLocaleString("en-IN")}</td>
-                      <td className="px-3 py-2.5 text-emerald-600">+₹{(p.allowances || 0).toLocaleString("en-IN")}</td>
-                      <td className="px-3 py-2.5 text-red-600">-₹{(p.deductions || 0).toLocaleString("en-IN")}</td>
+                      <td className="px-3 py-2.5">{currency.format(p.basicSalary || 0)}</td>
+                      <td className="px-3 py-2.5 text-emerald-600">+{currency.format(p.allowances || 0)}</td>
+                      <td className="px-3 py-2.5 text-red-600">-{currency.format(p.deductions || 0)}</td>
                       <td className="px-3 py-2.5 text-center">{p.leaveDays > 0 ? <Badge variant="outline" className="text-xs text-orange-700 border-orange-200 bg-orange-50">{p.leaveDays}d</Badge> : <span className="text-muted-foreground">0</span>}</td>
-                      <td className="px-3 py-2.5 font-bold">₹{(p.netSalary || 0).toLocaleString("en-IN")}</td>
+                      <td className="px-3 py-2.5 font-bold">{currency.format(p.netSalary || 0)}</td>
                       <td className="px-3 py-2.5"><Badge variant="outline" className={p.status === "Paid" ? "border-emerald-200 text-emerald-700 bg-emerald-50 text-xs" : "text-xs"}>{p.status}</Badge></td>
                       <td className="px-3 py-2.5">{p.status === "Pending" && <Button variant="outline" size="sm" className="h-7 text-xs rounded-lg text-emerald-700 border-emerald-200" onClick={() => markPaid.mutate(p.id)}>Mark Paid</Button>}</td>
                     </tr>
@@ -217,7 +219,7 @@ export default function PayrollPage() {
               </Select>
             </div>
             <div className="grid grid-cols-3 gap-2">
-              <div className="space-y-1.5"><Label className="text-xs">Basic (₹) *</Label><Input type="number" value={form.basicSalary || ""} onChange={e => set("basicSalary", e.target.value)} className="rounded-xl h-9" /></div>
+              <div className="space-y-1.5"><Label className="text-xs">Basic ({currency.symbol}) *</Label><Input type="number" value={form.basicSalary || ""} onChange={e => set("basicSalary", e.target.value)} className="rounded-xl h-9" /></div>
               <div className="space-y-1.5"><Label className="text-xs">Allowances</Label><Input type="number" value={form.allowances || ""} onChange={e => set("allowances", e.target.value)} className="rounded-xl h-9" placeholder="0" /></div>
               <div className="space-y-1.5"><Label className="text-xs">Deductions</Label><Input type="number" value={form.deductions || ""} onChange={e => set("deductions", e.target.value)} className="rounded-xl h-9" placeholder="0" /></div>
             </div>
@@ -229,11 +231,11 @@ export default function PayrollPage() {
                 <div className="flex justify-between"><span className="text-muted-foreground">Working Days (month)</span><span className="font-medium">{salaryCalc.workingDays} days</span></div>
                 <div className="flex justify-between"><span className="text-muted-foreground">Approved Leave Days</span><span className={`font-medium ${salaryCalc.leaveDays > 0 ? "text-orange-600" : ""}`}>{salaryCalc.leaveDays} days</span></div>
                 <div className="flex justify-between"><span className="text-muted-foreground">Present Days</span><span className="font-medium text-emerald-600">{salaryCalc.presentDays} days</span></div>
-                <div className="flex justify-between"><span className="text-muted-foreground">Per Day Salary</span><span className="font-medium">₹{Math.round(salaryCalc.perDaySalary).toLocaleString("en-IN")}</span></div>
+                <div className="flex justify-between"><span className="text-muted-foreground">Per Day Salary</span><span className="font-medium">{currency.format(Math.round(salaryCalc.perDaySalary))}</span></div>
                 {salaryCalc.leaveDays > 0 && (
-                  <div className="flex justify-between text-red-600"><span className="flex items-center gap-1"><TrendingDown className="w-3 h-3" />Leave Deduction</span><span className="font-medium">-₹{salaryCalc.leaveDeduction.toLocaleString("en-IN")}</span></div>
+                  <div className="flex justify-between text-red-600"><span className="flex items-center gap-1"><TrendingDown className="w-3 h-3" />Leave Deduction</span><span className="font-medium">-{currency.format(salaryCalc.leaveDeduction)}</span></div>
                 )}
-                <div className="border-t border-border/60 pt-1.5 flex justify-between font-bold"><span>Net Salary</span><span className="text-primary">₹{salaryCalc.netSalary.toLocaleString("en-IN")}</span></div>
+                <div className="border-t border-border/60 pt-1.5 flex justify-between font-bold"><span>Net Salary</span><span className="text-primary">{currency.format(salaryCalc.netSalary)}</span></div>
               </div>
             )}
 

@@ -12,6 +12,7 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ChevronLeft, User, Phone, GraduationCap, Edit2, Save, X, Users } from "lucide-react";
+import { useCurrency } from "@/contexts/currency";
 // User, Phone used in CardTitles
 import { format } from "date-fns";
 
@@ -26,6 +27,7 @@ function InfoRow({ label, value }: { label: string; value?: string | null }) {
 }
 
 export default function StudentViewPage() {
+  const currency = useCurrency();
   const { id } = useParams<{ id: string }>();
   const [, navigate] = useLocation();
   const { toast } = useToast();
@@ -304,7 +306,7 @@ export default function StudentViewPage() {
           <div className="bg-card rounded-2xl border border-border/50 shadow-sm overflow-hidden">
             <div className="px-4 py-3 bg-muted/30 border-b border-border/40 flex items-center justify-between">
               <p className="text-sm font-semibold">Fee Payment History</p>
-              <Badge className="bg-emerald-500 hover:bg-emerald-500">Total: ₹{totalPaid.toLocaleString("en-IN")}</Badge>
+              <Badge className="bg-emerald-500 hover:bg-emerald-500">Total: {currency.format(totalPaid)}</Badge>
             </div>
             <table className="w-full text-sm">
               <thead className="bg-muted/50"><tr>{["Receipt No","Month","Amount","Discount","Net","Mode","Date","Status"].map(h => <th key={h} className="text-left px-3 py-2.5 text-xs font-semibold text-muted-foreground">{h}</th>)}</tr></thead>
@@ -314,9 +316,9 @@ export default function StudentViewPage() {
                   <tr key={p.id} className="border-t border-border/40 hover:bg-accent/20">
                     <td className="px-3 py-2 font-mono text-xs">{p.receiptNo}</td>
                     <td className="px-3 py-2 text-muted-foreground">{p.month || "—"}</td>
-                    <td className="px-3 py-2">₹{(p.amount || 0).toLocaleString("en-IN")}</td>
-                    <td className="px-3 py-2 text-green-600">{p.discount ? `₹${p.discount}` : "—"}</td>
-                    <td className="px-3 py-2 font-semibold">₹{(p.netAmount || 0).toLocaleString("en-IN")}</td>
+                    <td className="px-3 py-2">{currency.format(p.amount || 0)}</td>
+                    <td className="px-3 py-2 text-green-600">{p.discount ? currency.format(p.discount) : "—"}</td>
+                    <td className="px-3 py-2 font-semibold">{currency.format(p.netAmount || 0)}</td>
                     <td className="px-3 py-2 text-muted-foreground">{p.paymentMode}</td>
                     <td className="px-3 py-2 text-xs text-muted-foreground">{p.paymentDate ? format(new Date(p.paymentDate), "dd MMM yyyy") : "—"}</td>
                     <td className="px-3 py-2"><Badge variant="outline" className={`text-xs ${p.status === "Paid" ? "border-emerald-200 text-emerald-700 bg-emerald-50" : ""}`}>{p.status}</Badge></td>

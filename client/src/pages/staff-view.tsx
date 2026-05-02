@@ -12,6 +12,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { ChevronLeft, User, Phone, MapPin, Edit2, Save, X, GraduationCap } from "lucide-react";
+import { useCurrency } from "@/contexts/currency";
 
 function InfoRow({ label, value }: { label: string; value?: string | null }) {
   return <div className="flex flex-col gap-0.5"><span className="text-xs text-muted-foreground">{label}</span><span className="text-sm font-medium">{value || "—"}</span></div>;
@@ -20,6 +21,7 @@ function InfoRow({ label, value }: { label: string; value?: string | null }) {
 const DESIGNATIONS = ["Teacher","Principal","Vice Principal","Librarian","Accountant","Clerk","Lab Assistant","Peon","Driver","Guard","Sports Teacher","Music Teacher","Art Teacher"];
 
 export default function StaffViewPage() {
+  const currency = useCurrency();
   const { id } = useParams<{ id: string }>();
   const [, navigate] = useLocation();
   const { toast } = useToast();
@@ -74,7 +76,7 @@ export default function StaffViewPage() {
             <Badge variant="outline" className={`text-xs ${member.status === "Active" ? "border-emerald-200 text-emerald-700 bg-emerald-50" : ""}`}>{member.status}</Badge>
           </div>
         </div>
-        {member.salary && <div className="text-right hidden sm:block"><p className="text-xs text-muted-foreground">Monthly Salary</p><p className="text-lg font-bold text-primary">₹{member.salary.toLocaleString("en-IN")}</p></div>}
+        {member.salary && <div className="text-right hidden sm:block"><p className="text-xs text-muted-foreground">Monthly Salary</p><p className="text-lg font-bold text-primary">{currency.format(member.salary)}</p></div>}
       </div>
 
       <Tabs defaultValue="details">
@@ -100,7 +102,7 @@ export default function StaffViewPage() {
                     <div className="space-y-1.5"><Label className="text-xs">Qualification</Label><Input value={form.qualification || ""} onChange={e => set("qualification", e.target.value)} className="rounded-xl h-8 text-xs" /></div>
                     <div className="space-y-1.5"><Label className="text-xs">Joining Date</Label><Input type="date" value={form.joiningDate || ""} onChange={e => set("joiningDate", e.target.value)} className="rounded-xl h-8 text-xs" /></div>
                     <div className="space-y-1.5"><Label className="text-xs">Experience</Label><Input value={form.experience || ""} onChange={e => set("experience", e.target.value)} className="rounded-xl h-8 text-xs" placeholder="2 years" /></div>
-                    <div className="space-y-1.5"><Label className="text-xs">Salary (₹)</Label><Input type="number" value={form.salary || ""} onChange={e => set("salary", e.target.value)} className="rounded-xl h-8 text-xs" /></div>
+                    <div className="space-y-1.5"><Label className="text-xs">Salary ({currency.symbol})</Label><Input type="number" value={form.salary || ""} onChange={e => set("salary", e.target.value)} className="rounded-xl h-8 text-xs" /></div>
                     <div className="space-y-1.5"><Label className="text-xs">Status</Label><Select value={form.status || "Active"} onValueChange={v => set("status", v)}><SelectTrigger className="rounded-xl h-8 text-xs"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="Active">Active</SelectItem><SelectItem value="Inactive">Inactive</SelectItem></SelectContent></Select></div>
                   </>
                 ) : (
@@ -177,10 +179,10 @@ export default function StaffViewPage() {
                 : memberPayrolls.map((p: any) => (
                   <tr key={p.id} className="border-t border-border/40 hover:bg-accent/20">
                     <td className="px-4 py-2.5 font-medium">{p.month}</td>
-                    <td className="px-4 py-2.5">₹{(p.basicSalary || 0).toLocaleString("en-IN")}</td>
-                    <td className="px-4 py-2.5 text-emerald-600">+₹{(p.allowances || 0).toLocaleString("en-IN")}</td>
-                    <td className="px-4 py-2.5 text-red-600">-₹{(p.deductions || 0).toLocaleString("en-IN")}</td>
-                    <td className="px-4 py-2.5 font-bold">₹{(p.netSalary || 0).toLocaleString("en-IN")}</td>
+                    <td className="px-4 py-2.5">{currency.format(p.basicSalary || 0)}</td>
+                    <td className="px-4 py-2.5 text-emerald-600">+{currency.format(p.allowances || 0)}</td>
+                    <td className="px-4 py-2.5 text-red-600">-{currency.format(p.deductions || 0)}</td>
+                    <td className="px-4 py-2.5 font-bold">{currency.format(p.netSalary || 0)}</td>
                     <td className="px-4 py-2.5"><Badge variant="outline" className={`text-xs ${p.status === "Paid" ? "border-emerald-200 text-emerald-700 bg-emerald-50" : ""}`}>{p.status}</Badge></td>
                   </tr>
                 ))}

@@ -14,7 +14,7 @@ import {
   Lock,
 } from "lucide-react";
 import { useAuth } from "@/contexts/auth";
-import { useCurrency, useExchangeRate } from "@/contexts/currency";
+import { useCurrency } from "@/contexts/currency";
 
 function loadRazorpay(): Promise<boolean> {
   return new Promise((resolve) => {
@@ -60,8 +60,6 @@ export default function PricingPage() {
   const { toast } = useToast();
   const { user } = useAuth();
   const currency = useCurrency();
-  // Plan prices are stored in INR — convert to the admin's selected currency
-  const { data: exchangeRate = 1 } = useExchangeRate("INR", currency.code);
 
   const activePlans = (plans as any[]).filter((p: any) => p.isActive);
   const usedFreeTrial = subStatus?.usedFreeTrial === true;
@@ -220,8 +218,7 @@ export default function PricingPage() {
   const getPlanPrice = (plan: any) => {
     if (plan.monthlyPrice === 0 && plan.yearlyPrice === 0) return "Free";
     const priceInr = billingCycle === "yearly" ? plan.yearlyPrice : plan.monthlyPrice;
-    const converted = Math.round(priceInr * exchangeRate);
-    return currency.format(converted);
+    return currency.format(priceInr);
   };
 
   const getSavings = (plan: any) => {

@@ -13,6 +13,7 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select";
 import { Plus, Search, Trash2, Bus, MapPin, Copy, Check, Navigation, Signal, Settings, Cpu, Link2, Unlink, Eye, EyeOff } from "lucide-react";
+import { useCurrency } from "@/contexts/currency";
 import { useConfirm } from "@/hooks/use-confirm";
 import "leaflet/dist/leaflet.css";
 
@@ -334,6 +335,7 @@ function LinkDeviceModal({ route, open, onClose }: { route: any; open: boolean; 
 }
 
 export default function TransportPage() {
+  const currency = useCurrency();
   const { toast } = useToast();
   const qc = useQueryClient();
   const { confirm, ConfirmDialog } = useConfirm();
@@ -417,7 +419,7 @@ export default function TransportPage() {
                     {r.driverName && <p>Driver: <span className="text-foreground font-medium">{r.driverName}</span></p>}
                     {r.driverPhone && <p>Phone: <span className="text-foreground">{r.driverPhone}</span></p>}
                     {r.capacity && <p>Capacity: <span className="text-foreground">{r.capacity} seats</span></p>}
-                    {r.monthlyFee && <p>Monthly Fee: <span className="text-foreground font-semibold">₹{r.monthlyFee.toLocaleString("en-IN")}</span></p>}
+                    {r.monthlyFee && <p>Monthly Fee: <span className="text-foreground font-semibold">{currency.format(r.monthlyFee)}</span></p>}
                   </div>
                   {r.stops && <div className="text-xs"><p className="font-medium mb-1 text-muted-foreground">Stops:</p><p className="text-foreground">{r.stops}</p></div>}
 
@@ -470,7 +472,7 @@ export default function TransportPage() {
               <div className="space-y-1.5"><Label className="text-xs">Capacity</Label><Input type="number" value={form.capacity || ""} onChange={e => set("capacity", e.target.value)} placeholder="40" className="rounded-xl h-9" /></div>
               <div className="space-y-1.5"><Label className="text-xs">Driver Name</Label><Input value={form.driverName || ""} onChange={e => set("driverName", e.target.value)} className="rounded-xl h-9" /></div>
               <div className="space-y-1.5"><Label className="text-xs">Driver Phone</Label><Input value={form.driverPhone || ""} onChange={e => set("driverPhone", e.target.value)} className="rounded-xl h-9" type="tel" /></div>
-              <div className="space-y-1.5"><Label className="text-xs">Monthly Fee (₹)</Label><Input type="number" value={form.monthlyFee || ""} onChange={e => set("monthlyFee", e.target.value)} className="rounded-xl h-9" /></div>
+              <div className="space-y-1.5"><Label className="text-xs">Monthly Fee ({currency.symbol})</Label><Input type="number" value={form.monthlyFee || ""} onChange={e => set("monthlyFee", e.target.value)} className="rounded-xl h-9" /></div>
             </div>
             <div className="space-y-1.5"><Label className="text-xs">Stops (comma separated)</Label><Input value={form.stops || ""} onChange={e => set("stops", e.target.value)} placeholder="Stop 1, Stop 2, Stop 3" className="rounded-xl h-9" /></div>
             <BranchSelectField value={form.branchId} onChange={v => set("branchId", v)} />

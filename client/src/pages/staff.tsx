@@ -13,11 +13,13 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Plus, Search, Eye, Trash2, MoreHorizontal, GraduationCap, ChevronLeft, ChevronRight } from "lucide-react";
 import { useConfirm } from "@/hooks/use-confirm";
+import { useCurrency } from "@/contexts/currency";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 
 const DESIGNATIONS = ["Teacher","Principal","Vice Principal","Librarian","Accountant","Clerk","Lab Assistant","Peon","Driver","Guard","Sports Teacher","Music Teacher","Art Teacher"];
 
 function AddStaffForm({ onClose }: { onClose: () => void }) {
+  const currency = useCurrency();
   const { toast } = useToast();
   const qc = useQueryClient();
   const { selectedBranchId } = useBranch();
@@ -83,7 +85,7 @@ function AddStaffForm({ onClose }: { onClose: () => void }) {
             <SelectContent>{["Male","Female","Other"].map(g => <SelectItem key={g} value={g}>{g}</SelectItem>)}</SelectContent>
           </Select>
         </div>
-        <div className="space-y-1.5"><Label className="text-xs">Salary (₹)</Label><Input type="number" value={form.salary || ""} onChange={e => set("salary", Number(e.target.value))} className="rounded-xl h-9" /></div>
+        <div className="space-y-1.5"><Label className="text-xs">Salary ({currency.symbol})</Label><Input type="number" value={form.salary || ""} onChange={e => set("salary", Number(e.target.value))} className="rounded-xl h-9" /></div>
         <div className="space-y-1.5"><Label className="text-xs">Alternate Phone</Label><Input value={form.alternatePhone || ""} onChange={e => set("alternatePhone", e.target.value)} className="rounded-xl h-9" type="tel" /></div>
         <div className="col-span-2 space-y-1.5"><Label className="text-xs">Address</Label><Input value={form.address || ""} onChange={e => set("address", e.target.value)} className="rounded-xl h-9" /></div>
         <div className="space-y-1.5"><Label className="text-xs">City</Label><Input value={form.city || ""} onChange={e => set("city", e.target.value)} className="rounded-xl h-9" /></div>

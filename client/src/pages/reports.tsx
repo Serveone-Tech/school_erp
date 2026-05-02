@@ -5,9 +5,11 @@ import { BarChart3, Users, GraduationCap, CreditCard, UserCheck, TrendingUp } fr
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { format } from "date-fns";
 import { useBranch } from "@/contexts/branch";
+import { useCurrency } from "@/contexts/currency";
 
 
 export default function ReportsPage() {
+  const currency = useCurrency();
   const { selectedBranchId, branchQuery } = useBranch();
   const { data: studentsRaw } = useQuery({ queryKey: ["/api/students", selectedBranchId], queryFn: () => apiFetch(`/api/students${branchQuery}`) });
   const { data: staffRaw } = useQuery({ queryKey: ["/api/staff", selectedBranchId], queryFn: () => apiFetch(`/api/staff${branchQuery}`) });
@@ -50,7 +52,7 @@ export default function ReportsPage() {
   const statCards = [
     { title: "Total Students", value: students.length, sub: `${activeStudents} active`, icon: Users, color: "bg-blue-50 text-blue-600" },
     { title: "Active Staff", value: activeStaff, sub: `${staffList.length} total`, icon: GraduationCap, color: "bg-purple-50 text-purple-600" },
-    { title: "Total Fee Collected", value: `₹${totalFees.toLocaleString("en-IN")}`, sub: `${payments.length} receipts`, icon: CreditCard, color: "bg-emerald-50 text-emerald-600" },
+    { title: "Total Fee Collected", value: currency.format(totalFees), sub: `${payments.length} receipts`, icon: CreditCard, color: "bg-emerald-50 text-emerald-600" },
     { title: "Total Classes", value: classes.length, sub: "Active classes", icon: BarChart3, color: "bg-amber-50 text-amber-600" },
   ];
 
@@ -145,7 +147,7 @@ export default function ReportsPage() {
                     <div className="flex-1 bg-muted rounded-full h-2 overflow-hidden">
                       <div className="bg-emerald-500 h-2 rounded-full" style={{ width: `${Math.min((amount / Math.max(...Object.values(monthlyFees) as number[])) * 100, 100)}%` }} />
                     </div>
-                    <span className="text-xs font-semibold">₹{(amount as number).toLocaleString("en-IN")}</span>
+                    <span className="text-xs font-semibold">{currency.format(amount as number)}</span>
                   </div>
                 ))}
               </div>}

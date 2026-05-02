@@ -323,7 +323,7 @@ function CollectFeeDialog({ students, structures, classes, branchId, onClose, on
                 <SelectItem value="_">Select Fee Type</SelectItem>
                 {relevantStructures.map((s: any) => (
                   <SelectItem key={s.id} value={String(s.id)}>
-                    {s.name} — ₹{s.amount.toLocaleString("en-IN")} / {s.frequency}
+                    {s.name} — {currency.format(s.amount)} / {s.frequency}
                   </SelectItem>
                 ))}
               </SelectContent>

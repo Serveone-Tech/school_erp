@@ -22,15 +22,21 @@ export function useCurrency() {
     staleTime: 5 * 60 * 1000,
   });
 
-  const code = data?.currency || "USD";
-  const info = CURRENCIES[code] || CURRENCIES.USD;
+  const code = data?.currency || "INR";
+  const info = CURRENCIES[code] || CURRENCIES.INR;
+
+  // All amounts in the DB are stored in INR; convert to selected currency for display.
+  const { data: exchangeRate = 1 } = useExchangeRate("INR", code);
 
   return {
     code,
     symbol: info.symbol,
     name: info.name,
-    format: (amount: number) =>
-      `${info.symbol}${amount.toLocaleString(info.locale)}`,
+    exchangeRate,
+    format: (amount: number) => {
+      const converted = code === "INR" ? amount : Math.round(amount * exchangeRate);
+      return `${info.symbol}${converted.toLocaleString(info.locale)}`;
+    },
   };
 }
 

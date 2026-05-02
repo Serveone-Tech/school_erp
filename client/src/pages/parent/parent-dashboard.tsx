@@ -4,8 +4,10 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Loader2, UserCheck, CreditCard, FileText, Bell, BookOpen, MessageSquare } from "lucide-react";
 import { useParentAuth } from "@/contexts/parent-auth";
+import { useCurrency } from "@/contexts/currency";
 
 export default function ParentDashboardPage() {
+  const currency = useCurrency();
   const { activeStudent } = useParentAuth();
 
   const { data: attendance, isLoading: loadingAtt } = useQuery<any>({
@@ -96,7 +98,7 @@ export default function ParentDashboardPage() {
                   <Loader2 className="w-4 h-4 animate-spin" />
                 ) : (
                   <p className="text-2xl font-bold text-blue-600">
-                    ₹{feesData?.summary?.totalPaid?.toLocaleString() ?? 0}
+                    {currency.format(feesData?.summary?.totalPaid ?? 0)}
                   </p>
                 )}
                 <p className="text-xs text-muted-foreground mt-0.5">

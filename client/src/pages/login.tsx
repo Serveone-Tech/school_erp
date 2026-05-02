@@ -12,7 +12,7 @@ import {
   CardTitle,
   CardDescription,
 } from "@/components/ui/card";
-import { Loader2, GraduationCap, Users } from "lucide-react";
+import { Loader2, GraduationCap, Users, AlertTriangle } from "lucide-react";
 import { ForgotPasswordDialog } from "@/components/password-dialogs";
 
 export default function LoginPage() {
@@ -22,6 +22,11 @@ export default function LoginPage() {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [forgotOpen, setForgotOpen] = useState(false);
+  const [expiredBanner] = useState(() => {
+    const flag = sessionStorage.getItem("plan_expired_logout");
+    if (flag) { sessionStorage.removeItem("plan_expired_logout"); return true; }
+    return false;
+  });
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -56,6 +61,13 @@ export default function LoginPage() {
             </p>
           </div>
         </div>
+
+        {expiredBanner && (
+          <div className="mb-4 flex items-start gap-2.5 rounded-xl border border-red-400/30 bg-red-500/20 px-4 py-3 text-sm text-red-200">
+            <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" />
+            <span>Your subscription plan has expired. Please log in and renew your plan to continue.</span>
+          </div>
+        )}
 
         <Card className="shadow-2xl border-white/10 bg-white/5 backdrop-blur">
           <CardHeader className="pb-4">

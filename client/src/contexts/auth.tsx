@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useEffect, useCallback } from "react";
+import { createContext, useContext, useState, useEffect, useCallback, useRef } from "react";
 import { apiRequest } from "@/lib/queryClient";
 import { queryClient } from "@/lib/queryClient";
 import { hasPerm, type PermAction } from "@/lib/permissions";
@@ -32,6 +32,8 @@ interface AuthContextType {
   isAuthenticated: boolean;
   subscriptionStatus: SubscriptionStatus;
   plan: PlanLimits | null;
+  daysLeft: number;
+  subEndDate: string | null;
   login: (email: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
   /** Admin always returns true. Others check permissions array. */
@@ -49,14 +51,24 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [isLoading, setIsLoading] = useState(true);
   const [subscriptionStatus, setSubscriptionStatus] = useState<SubscriptionStatus>("none");
   const [plan, setPlan] = useState<PlanLimits | null>(null);
+  const [daysLeft, setDaysLeft] = useState(0);
+  const [subEndDate, setSubEndDate] = useState<string | null>(null);
 
   const fetchSubscriptionStatus = useCallback(async (u: AuthUser) => {
-    if (u.role === "superadmin") { setSubscriptionStatus("active"); setPlan(null); return; }
+    if (u.role === "superadmin") {
+      setSubscriptionStatus("active");
+      setPlan(null);
+      setDaysLeft(999);
+      setSubEndDate(null);
+      return;
+    }
     try {
       const res = await fetch("/api/plans/subscription/status", { credentials: "include" });
       if (res.ok) {
         const data = await res.json();
         setSubscriptionStatus(data.status || "none");
+        setDaysLeft(data.daysLeft ?? 0);
+        setSubEndDate(data.endDate ?? null);
         if (data.plan) {
           setPlan({
             maxStudents: data.plan.maxStudents ?? 0,
@@ -72,10 +84,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       } else {
         setSubscriptionStatus("none");
         setPlan(null);
+        setDaysLeft(0);
+        setSubEndDate(null);
       }
     } catch {
       setSubscriptionStatus("none");
       setPlan(null);
+      setDaysLeft(0);
+      setSubEndDate(null);
     }
   }, []);
 
@@ -117,13 +133,47 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     await fetchSubscriptionStatus(data.user);
   };
 
-  const logout = async () => {
+  const logout = useCallback(async () => {
     await fetch("/api/auth/logout", { method: "POST", credentials: "include" });
     setUser(null);
     setSubscriptionStatus("none");
     setPlan(null);
+    setDaysLeft(0);
+    setSubEndDate(null);
     queryClient.clear();
-  };
+  }, []);
+
+  // Track whether the session ever had an active subscription
+  const wasActiveRef = useRef(false);
+  const userRef = useRef(user);
+  useEffect(() => { userRef.current = user; }, [user]);
+
+  // Auto-logout when plan expires during an active session
+  useEffect(() => {
+    if (!user || user.role === "superadmin") return;
+    const isSubUser = user.role !== "admin" || user.adminId !== null;
+    if (isSubUser) return;
+
+    if (subscriptionStatus === "active" || subscriptionStatus === "expiring_soon") {
+      wasActiveRef.current = true;
+    } else if (subscriptionStatus === "expired" && wasActiveRef.current) {
+      wasActiveRef.current = false;
+      sessionStorage.setItem("plan_expired_logout", "1");
+      logout();
+    }
+  }, [subscriptionStatus, user, logout]);
+
+  // Poll subscription status every 5 minutes to catch mid-session expiry
+  useEffect(() => {
+    if (!user || user.role === "superadmin") return;
+    const isSubUser = user.role !== "admin" || user.adminId !== null;
+    if (isSubUser) return;
+
+    const interval = setInterval(() => {
+      if (userRef.current) fetchSubscriptionStatus(userRef.current);
+    }, 5 * 60 * 1000);
+    return () => clearInterval(interval);
+  }, [user?.id, fetchSubscriptionStatus]);
 
   const hasPermission = useCallback((module: string, action: PermAction): boolean => {
     if (!user) return false;
@@ -144,7 +194,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, [plan]);
 
   return (
-    <AuthContext.Provider value={{ user, isLoading, isAuthenticated: !!user, subscriptionStatus, plan, login, logout, hasPermission, canAccess, planAllows }}>
+    <AuthContext.Provider value={{ user, isLoading, isAuthenticated: !!user, subscriptionStatus, plan, daysLeft, subEndDate, login, logout, hasPermission, canAccess, planAllows }}>
       {children}
     </AuthContext.Provider>
   );

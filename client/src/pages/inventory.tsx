@@ -11,9 +11,11 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Plus, Search, Package, Edit2 } from "lucide-react";
+import { useCurrency } from "@/contexts/currency";
 
 
 export default function InventoryPage() {
+  const currency = useCurrency();
   const { toast } = useToast();
   const qc = useQueryClient();
   const [search, setSearch] = useState("");
@@ -63,7 +65,7 @@ export default function InventoryPage() {
                   </div>
                 </td>
                 <td className="px-4 py-2.5 text-muted-foreground">{item.unit || "—"}</td>
-                <td className="px-4 py-2.5 text-muted-foreground">{item.purchasePrice ? `₹${item.purchasePrice}` : "—"}</td>
+                <td className="px-4 py-2.5 text-muted-foreground">{item.purchasePrice ? currency.format(item.purchasePrice) : "—"}</td>
                 <td className="px-4 py-2.5 text-muted-foreground">{item.location || "—"}</td>
                 <td className="px-4 py-2.5">{(item.quantity || 0) < 5 && <Badge className="text-xs bg-red-500 hover:bg-red-500">Low Stock</Badge>}</td>
               </tr>
@@ -80,7 +82,7 @@ export default function InventoryPage() {
               <div className="space-y-1.5"><Label className="text-xs">Category</Label><Input value={form.category || ""} onChange={e => set("category", e.target.value)} placeholder="Stationery, Furniture..." className="rounded-xl h-9" /></div>
               <div className="space-y-1.5"><Label className="text-xs">Quantity *</Label><Input type="number" value={form.quantity} onChange={e => set("quantity", Number(e.target.value))} className="rounded-xl h-9" /></div>
               <div className="space-y-1.5"><Label className="text-xs">Unit</Label><Input value={form.unit || ""} onChange={e => set("unit", e.target.value)} placeholder="Pcs, Box, Kg..." className="rounded-xl h-9" /></div>
-              <div className="space-y-1.5"><Label className="text-xs">Purchase Price (₹)</Label><Input type="number" value={form.purchasePrice || ""} onChange={e => set("purchasePrice", e.target.value)} className="rounded-xl h-9" /></div>
+              <div className="space-y-1.5"><Label className="text-xs">Purchase Price ({currency.symbol})</Label><Input type="number" value={form.purchasePrice || ""} onChange={e => set("purchasePrice", e.target.value)} className="rounded-xl h-9" /></div>
               <div className="col-span-2 space-y-1.5"><Label className="text-xs">Location/Vendor</Label><Input value={form.location || ""} onChange={e => set("location", e.target.value)} className="rounded-xl h-9" /></div>
             </div>
             <BranchSelectField value={form.branchId} onChange={v => set("branchId", v)} />

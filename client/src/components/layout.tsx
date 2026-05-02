@@ -118,7 +118,7 @@ function useOrganization() {
 
 function SidebarContent({ onClose }: { onClose?: () => void }) {
   const [location] = useLocation();
-  const { user, logout, canAccess, planAllows } = useAuth();
+  const { user, logout, canAccess, planAllows, plan, daysLeft, subEndDate, subscriptionStatus } = useAuth();
   const [changePasswordOpen, setChangePasswordOpen] = useState(false);
   const { data: org } = useOrganization();
 
@@ -200,6 +200,37 @@ function SidebarContent({ onClose }: { onClose?: () => void }) {
             <p className="text-[11px] capitalize" style={{ color: "hsl(210 20% 55%)" }}>{user?.role}</p>
           </div>
         </div>
+
+        {/* Plan validity chip — only for admin with active/expiring plan */}
+        {isAdmin && plan && subEndDate && subscriptionStatus !== "none" && (
+          <div className="mx-1 mb-1 px-3 py-2 rounded-lg" style={{ backgroundColor: "hsl(220 22% 17%)" }}>
+            <div className="flex items-center justify-between mb-0.5">
+              <span className="text-[10px] font-bold uppercase tracking-wider" style={{ color: "hsl(210 20% 45%)" }}>
+                Active Plan
+              </span>
+              <span
+                className="text-[11px] font-bold px-1.5 py-0.5 rounded"
+                style={
+                  subscriptionStatus === "expired"
+                    ? { backgroundColor: "hsl(0 72% 22%)", color: "hsl(0 80% 70%)" }
+                    : daysLeft <= 5
+                    ? { backgroundColor: "hsl(38 80% 22%)", color: "hsl(38 90% 68%)" }
+                    : { backgroundColor: "hsl(142 60% 18%)", color: "hsl(142 71% 58%)" }
+                }
+              >
+                {subscriptionStatus === "expired" ? "Expired" : `${daysLeft}d left`}
+              </span>
+            </div>
+            <p className="text-xs font-semibold" style={{ color: "hsl(210 30% 82%)" }}>{plan.name}</p>
+            <p className="text-[10px]" style={{ color: "hsl(210 20% 48%)" }}>
+              Valid till{" "}
+              {new Date(subEndDate).toLocaleDateString("en-IN", {
+                day: "numeric", month: "short", year: "numeric",
+              })}
+            </p>
+          </div>
+        )}
+
         <button onClick={() => setChangePasswordOpen(true)} className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-colors"
           style={{ color: "hsl(210 25% 65%)" }}
           onMouseEnter={e => { e.currentTarget.style.backgroundColor = "hsl(220 22% 20%)"; }}

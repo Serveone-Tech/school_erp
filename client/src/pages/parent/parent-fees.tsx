@@ -1,7 +1,8 @@
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Loader2, CreditCard, IndianRupee } from "lucide-react";
+import { Loader2, CreditCard } from "lucide-react";
+import { useCurrency } from "@/contexts/currency";
 
 const STATUS_COLORS: Record<string, string> = {
   Paid: "bg-green-100 text-green-700",
@@ -10,6 +11,7 @@ const STATUS_COLORS: Record<string, string> = {
 };
 
 export default function ParentFeesPage() {
+  const currency = useCurrency();
   const { data, isLoading } = useQuery<any>({
     queryKey: ["/api/parent/fees"],
     queryFn: async () => {
@@ -37,8 +39,8 @@ export default function ParentFeesPage() {
         <Card className="border-l-4 border-l-green-500">
           <CardContent className="pt-4 pb-3">
             <p className="text-xs text-muted-foreground mb-1">Total Paid</p>
-            <p className="text-2xl font-bold text-green-600 flex items-center gap-1">
-              <IndianRupee className="w-5 h-5" />{totalPaid.toLocaleString()}
+            <p className="text-2xl font-bold text-green-600">
+              {currency.format(totalPaid)}
             </p>
           </CardContent>
         </Card>
@@ -64,7 +66,7 @@ export default function ParentFeesPage() {
                     <p className="font-medium">{s.name}</p>
                     <p className="text-xs text-muted-foreground">{s.frequency}</p>
                   </div>
-                  <p className="font-semibold text-primary">₹{s.amount?.toLocaleString()}</p>
+                  <p className="font-semibold text-primary">{currency.format(s.amount ?? 0)}</p>
                 </div>
               ))}
             </div>
@@ -95,7 +97,7 @@ export default function ParentFeesPage() {
                       </p>
                     </div>
                     <div className="text-right">
-                      <p className="font-semibold text-green-600">₹{p.netAmount?.toLocaleString()}</p>
+                      <p className="font-semibold text-green-600">{currency.format(p.netAmount ?? 0)}</p>
                       <Badge className={`text-[10px] ${STATUS_COLORS[p.status ?? "Paid"] ?? ""}`}>
                         {p.status ?? "Paid"}
                       </Badge>
@@ -103,8 +105,8 @@ export default function ParentFeesPage() {
                   </div>
                   {(p.discount > 0 || p.fine > 0) && (
                     <div className="flex gap-3 text-xs text-muted-foreground">
-                      {p.discount > 0 && <span className="text-green-600">Discount: ₹{p.discount}</span>}
-                      {p.fine > 0 && <span className="text-red-500">Fine: ₹{p.fine}</span>}
+                      {p.discount > 0 && <span className="text-green-600">Discount: {currency.format(p.discount)}</span>}
+                      {p.fine > 0 && <span className="text-red-500">Fine: {currency.format(p.fine)}</span>}
                     </div>
                   )}
                   {p.remark && <p className="text-xs text-muted-foreground mt-1">{p.remark}</p>}

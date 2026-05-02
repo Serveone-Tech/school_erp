@@ -13,12 +13,14 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardContent } from "@/components/ui/card";
 import { Plus, TrendingUp, TrendingDown, IndianRupee } from "lucide-react";
+import { useCurrency } from "@/contexts/currency";
 import { format } from "date-fns";
 
 const INCOME_CATS = ["Donation","Grant","Rental Income","Other Income"];
 const EXPENSE_CATS = ["Salary","Maintenance","Stationery","Utilities","Transport","Events","IT","Furniture","Other Expense"];
 
 export default function TransactionsPage() {
+  const currency = useCurrency();
   const { toast } = useToast();
   const qc = useQueryClient();
   const [addOpen, setAddOpen] = useState(false);
@@ -47,19 +49,19 @@ export default function TransactionsPage() {
         <Card className="rounded-2xl border-border/50 shadow-sm">
           <CardContent className="p-4 flex items-center gap-3">
             <div className="w-10 h-10 rounded-xl bg-emerald-50 flex items-center justify-center"><TrendingUp className="w-5 h-5 text-emerald-600" /></div>
-            <div><p className="text-xs text-muted-foreground">Total Income</p><p className="font-bold">₹{totalIncome.toLocaleString("en-IN")}</p></div>
+            <div><p className="text-xs text-muted-foreground">Total Income</p><p className="font-bold">{currency.format(totalIncome)}</p></div>
           </CardContent>
         </Card>
         <Card className="rounded-2xl border-border/50 shadow-sm">
           <CardContent className="p-4 flex items-center gap-3">
             <div className="w-10 h-10 rounded-xl bg-red-50 flex items-center justify-center"><TrendingDown className="w-5 h-5 text-red-600" /></div>
-            <div><p className="text-xs text-muted-foreground">Total Expense</p><p className="font-bold">₹{totalExpense.toLocaleString("en-IN")}</p></div>
+            <div><p className="text-xs text-muted-foreground">Total Expense</p><p className="font-bold">{currency.format(totalExpense)}</p></div>
           </CardContent>
         </Card>
         <Card className="rounded-2xl border-border/50 shadow-sm">
           <CardContent className="p-4 flex items-center gap-3">
             <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${totalIncome - totalExpense >= 0 ? "bg-blue-50" : "bg-red-50"}`}><IndianRupee className={`w-5 h-5 ${totalIncome - totalExpense >= 0 ? "text-blue-600" : "text-red-600"}`} /></div>
-            <div><p className="text-xs text-muted-foreground">Net Balance</p><p className={`font-bold ${totalIncome - totalExpense >= 0 ? "text-blue-600" : "text-red-600"}`}>₹{(totalIncome - totalExpense).toLocaleString("en-IN")}</p></div>
+            <div><p className="text-xs text-muted-foreground">Net Balance</p><p className={`font-bold ${totalIncome - totalExpense >= 0 ? "text-blue-600" : "text-red-600"}`}>{currency.format(totalIncome - totalExpense)}</p></div>
           </CardContent>
         </Card>
       </div>
@@ -76,7 +78,7 @@ export default function TransactionsPage() {
                 <td className="px-4 py-2.5"><Badge variant="outline" className={`text-xs ${t.type === "Income" ? "border-emerald-200 text-emerald-700 bg-emerald-50" : "border-red-200 text-red-700 bg-red-50"}`}>{t.type}</Badge></td>
                 <td className="px-4 py-2.5"><Badge variant="outline" className="text-xs">{t.category}</Badge></td>
                 <td className="px-4 py-2.5 text-muted-foreground">{t.description || "—"}</td>
-                <td className={`px-4 py-2.5 font-semibold ${t.type === "Income" ? "text-emerald-600" : "text-red-600"}`}>{t.type === "Income" ? "+" : "-"}₹{(t.amount || 0).toLocaleString("en-IN")}</td>
+                <td className={`px-4 py-2.5 font-semibold ${t.type === "Income" ? "text-emerald-600" : "text-red-600"}`}>{t.type === "Income" ? "+" : "-"}{currency.format(t.amount || 0)}</td>
               </tr>
             ))}
           </tbody>
@@ -101,7 +103,7 @@ export default function TransactionsPage() {
                 <SelectContent><SelectItem value="_">Select</SelectItem>{(form.type === "Income" ? INCOME_CATS : EXPENSE_CATS).map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}</SelectContent>
               </Select>
             </div>
-            <div className="space-y-1.5"><Label className="text-xs">Amount (₹) *</Label><Input type="number" value={form.amount || ""} onChange={e => set("amount", e.target.value)} className="rounded-xl h-9" /></div>
+            <div className="space-y-1.5"><Label className="text-xs">Amount ({currency.symbol}) *</Label><Input type="number" value={form.amount || ""} onChange={e => set("amount", e.target.value)} className="rounded-xl h-9" /></div>
             <div className="space-y-1.5"><Label className="text-xs">Date</Label><Input type="date" value={form.date} onChange={e => set("date", e.target.value)} className="rounded-xl h-9" /></div>
             <div className="space-y-1.5"><Label className="text-xs">Description</Label><Input value={form.description || ""} onChange={e => set("description", e.target.value)} className="rounded-xl h-9" /></div>
             <BranchSelectField value={form.branchId} onChange={v => set("branchId", v)} />

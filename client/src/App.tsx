@@ -7,6 +7,8 @@ import { AppLayout } from "@/components/layout";
 import { ParentLayout } from "@/components/parent-layout";
 import { BranchProvider } from "@/contexts/branch";
 
+import { PlanExpiredScreen, ExpiryPopup } from "@/components/subscription-banner";
+
 // Pages
 import LoginPage from "@/pages/login";
 import RegisterPage from "@/pages/register";
@@ -133,12 +135,17 @@ function AuthenticatedRouter() {
   }
 
   // Gate 2: Subscription — only primary admin needs a plan
-  if (!isSubUser && (subscriptionStatus === "none" || subscriptionStatus === "expired")) {
+  if (!isSubUser && subscriptionStatus === "expired") {
+    // Allow /pricing so they can renew; everything else shows the expired block
+    if (location !== "/pricing") return <PlanExpiredScreen />;
+  }
+  if (!isSubUser && subscriptionStatus === "none") {
     return <PricingPage />;
   }
 
   return (
     <BranchProvider>
+      <ExpiryPopup />
       <AppLayout>
         <Switch>
           <Route path="/" component={DashboardPage} />
