@@ -50,7 +50,7 @@ export function startBackupScheduler() {
 
         const result = await sendEmail({
           to: user.email,
-          subject: `Action Required: Your ${plan.name} plan expires in ${daysLeft} day${daysLeft !== 1 ? "s" : ""}`,
+          subject: `Action Required: Your ${plan.name} expires in ${daysLeft} day${daysLeft !== 1 ? "s" : ""}`,
           text: `Dear ${user.name},\n\nThis is a reminder that your ${plan.name} subscription will expire in ${daysLeft} day${daysLeft !== 1 ? "s" : ""}, on ${expireDateStr}.\n\nTo continue using School ERP without any interruption, please renew your plan before it expires.\n\nLog in to your dashboard and go to Subscription Plans to renew.\n\nIf you have any questions, please contact our support team.\n\nThank you,\nSchool ERP Team`,
         });
 

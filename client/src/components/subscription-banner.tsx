@@ -38,7 +38,7 @@ export function SubscriptionBanner() {
       <div className="flex items-center gap-3">
         <AlertTriangle className="w-4 h-4 shrink-0" />
         <p className="text-sm font-medium">
-          Your <strong>{subStatus.plan?.name}</strong> plan expires <strong>{dayLabel}</strong>. Renew now to avoid interruption.
+          Your <strong>{subStatus.plan?.name}</strong> expires <strong>{dayLabel}</strong>. Renew now to avoid interruption.
         </p>
       </div>
       <div className="flex items-center gap-2">
@@ -89,7 +89,7 @@ export function ExpiryPopup() {
         <div>
           <h2 className="text-xl font-bold text-foreground">Plan Expiring Soon!</h2>
           <p className="text-muted-foreground text-sm mt-2">
-            Your <strong>{subStatus?.plan?.name}</strong> plan expires in{" "}
+            Your <strong>{subStatus?.plan?.name}</strong> expires in{" "}
             <strong className="text-amber-600">{dayLabel}</strong>.
             Renew now to keep access to all features.
           </p>

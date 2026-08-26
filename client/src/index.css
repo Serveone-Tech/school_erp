@@ -1,32 +1,74 @@
+@import url('https://fonts.googleapis.com/css2?family=Exo+2:wght@300;400;500;600;700;800&family=Inter:wght@300;400;500;600&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
-    --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
-    --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
-    --primary: 210 78% 35%;
-    --primary-foreground: 210 40% 98%;
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 210 78% 35%;
-    --radius: 0.5rem;
-    --sidebar: 220 25% 12%;
-    --sidebar-foreground: 210 30% 92%;
-    --sidebar-border: 220 22% 20%;
+    /* ═══════════════════════════════════════════
+       ZALGO CRM Dark Theme
+       bg-base:      #0f0f1a  → 240 25% 8%
+       bg-secondary: #1a1a2e  → 240 28% 14%
+       bg-card:      #1e1e35  → 240 28% 16%
+       bg-elevated:  #242442  → 240 34% 20%
+       brand-teal:   #009999  → 180 100% 30%
+    ═══════════════════════════════════════════ */
+
+    /* Backgrounds */
+    --background:         240 25% 8%;
+    --foreground:         240 20% 95%;
+
+    --card:               240 28% 16%;
+    --card-foreground:    240 20% 95%;
+
+    --popover:            240 34% 20%;
+    --popover-foreground: 240 20% 95%;
+
+    /* Brand — Teal #009999 */
+    --primary:            180 100% 30%;
+    --primary-foreground: 0 0% 100%;
+
+    /* Secondary surfaces */
+    --secondary:          240 28% 14%;
+    --secondary-foreground: 240 20% 95%;
+
+    /* Muted / elevated */
+    --muted:              240 34% 20%;
+    --muted-foreground:   240 14% 44%;
+
+    /* Accent (teal tint) */
+    --accent:             180 100% 30%;
+    --accent-foreground:  0 0% 100%;
+
+    /* Destructive */
+    --destructive:        0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+
+    /* Borders & inputs */
+    --border:             240 20% 20%;
+    --input:              240 34% 20%;
+    --ring:               180 100% 30%;
+
+    /* Radius */
+    --radius: 0.6rem;
+
+    /* ── Sidebar ── */
+    --sidebar:                    240 28% 14%;
+    --sidebar-foreground:         240 14% 68%;
+    --sidebar-border:             240 20% 20%;
+    --sidebar-primary:            180 100% 30%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent:             240 34% 20%;
+    --sidebar-accent-foreground:  240 20% 95%;
+    --sidebar-ring:               180 100% 30%;
+
+    /* ── Charts ── */
+    --chart-1: 180 100% 30%;   /* teal */
+    --chart-2: 160 84% 39%;    /* green  #10b981 */
+    --chart-3: 38 92% 50%;     /* amber  #f59e0b */
+    --chart-4: 217 91% 60%;    /* blue   #3b82f6 */
+    --chart-5: 270 60% 60%;    /* purple */
   }
 }
 
@@ -34,7 +76,32 @@
   * {
     @apply border-border;
   }
+
   body {
     @apply bg-background text-foreground;
+    font-family: 'Inter', sans-serif;
+    font-size: 14px;
   }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: 'Exo 2', sans-serif;
+  }
+}
+
+/* ── Custom scrollbar ── */
+::-webkit-scrollbar           { width: 4px; height: 4px; }
+::-webkit-scrollbar-track     { background: transparent; }
+::-webkit-scrollbar-thumb     { background: hsl(180 100% 30% / 0.35); border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: hsl(180 100% 30% / 0.6); }
+
+/* ── Selection ── */
+::selection { background: hsl(180 100% 30% / 0.2); }
+
+/* ── Input autofill dark fix ── */
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus {
+  -webkit-box-shadow: 0 0 0 1000px hsl(240 34% 20%) inset !important;
+  -webkit-text-fill-color: hsl(240 20% 95%) !important;
+  caret-color: hsl(240 20% 95%);
 }
